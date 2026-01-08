@@ -1,60 +1,136 @@
-## Getting started with a new training content repository
+Here is the **`README.md`** for the repository root.
 
-- Open the [course-starter-template](https://github.com/RedHatQuickCourses/course-starter-template)
+This file serves two purposes:
 
-- Click on `Use This template` button and select `Create a new repository` option.
+1. It documents how to build the full course (Antora).
+2. It acts as a **"Cheat Sheet"** for advanced users who want to run the lab immediately without reading the full course text.
 
-![use-this-template.png](./images/use-this-template.png)
+---
 
-- On `Create a new repository` page, Select the options as highlighted in the below image and then click `Create repository` button at the bottom of the page.
+**File Name:** `README.md`
 
-![create-new-repo.png](./images/create-new-repo.png)
+```markdown
+# The AI Supply Chain: Red Hat OpenShift AI 3.0 Model Registry
+**From Shadow IT to Trusted Assets**
 
-- Clone this repository on your local system:
-```
-git clone git@github.com:RedHatQuickCourses/my-training-repository.git
-```
-NOTE: Use your repository url in the above command.
+> **The Problem:** Data Scientists are downloading models to random laptops and S3 buckets.  
+> **The Solution:** A Private Model Registry that governs your AI assets ("The Vault") and connects them to the OpenShift AI Dashboard ("The Showroom").
 
-- Go in to the course repository directory and initialize the course.
-``` 
-cd my-training-repository/
-sh course-init.sh --type bfx --lab demo
-```
-NOTE: If you are using Mac, use *zsh* in place of *sh* in the above command.
+This repository contains a complete **"Course-in-a-Box"** that teaches you how to deploy, populate, and integrate the Red Hat OpenShift AI (RHOAI) Model Registry.
 
-Sample output:
-```
-Initializing my-training-repository . . . done
+---
 
-Please replace the specified strings in the files below and commit the changes before proceeding with the course development.
-antora.yml:title: REPLACE Course Title
-```
+## 📚 Option 1: View the Full Course (Antora)
 
-- Edit the files prompted by course initialization script.
+This repository is structured as an Antora documentation site. To view the full learning experience with diagrams, architecture deep-dives, and troubleshooting guides:
 
-- Commit the changes done by course initialization script and your manual edits.
-```
- git status 
- git add -A; git commit -m "course initialization"
- git push origin main 
+### Using Docker (Recommended)
+```bash
+docker run -u $(id -u) -v $PWD:/antora:Z --rm -t antora/antora playbook.yaml
+# Open the generated site:
+# open build/site/index.html
+
 ```
 
-- Browse your git repository url 
+### Using Local NPM
 
-- On your github repo page, on left hand side pane, click on settings gear icon near `About` heading.
+```bash
+npm install
+npx antora playbook.yaml
+# Open build/site/index.html
 
-- Click `Use your GitHub Pages website` option to select (checked) it and then click `Save changes` button.
+```
 
-![github-pages-setting](./images/github-pages-setting.png)
+---
 
-- You should now see the link to access the rendered content within that same block.
+## ⚡ Option 2: The Fast Track (Deployment Guide)
 
-![quickcourse-rendered-url](./images/quickcourse-rendered-url.png)
+If you are an experienced Platform Engineer and just want to deploy the solution **now**, follow these steps.
 
-FIXME: highlight the relevant area on images.
+### Prerequisites
 
-**SEE ALSO**
+* **Cluster:** OpenShift AI 3.0 installed.
+* **Access:** `cluster-admin` privileges (required to install Registry dependencies).
+* **CLI:** `oc` and `python3` installed locally.
 
-- [Development using devspace](./DEVSPACE.md)
-- [Guideline for editing your content](./USAGEGUIDE.adoc)
+### Step 1: Deploy Infrastructure ("The Plumbing")
+
+Create the namespace, MySQL database, and MinIO object storage.
+
+```bash
+./quickstart/01-infrastructure/setup.sh
+
+```
+
+*Wait for pods in `rhoai-model-registry` to be `Running`.*
+
+### Step 2: Ingest & Register a Model ("The Content")
+
+Run the automated pipeline to:
+
+1. Download `granite-7b-lab` from Hugging Face.
+2. Upload it to your private MinIO bucket.
+3. Register the metadata in the Model Registry.
+
+```bash
+# Install dependencies (if needed)
+pip install -r quickstart/02-registration-code/requirements.txt
+
+# Run the pipeline (Internal DNS Mode)
+./quickstart/02-registration-code/run_pipeline.sh
+
+```
+
+### Step 3: Connect the Catalog ("The UI")
+
+Apply the configuration that tells the RHOAI Dashboard to display your private registry models.
+
+```bash
+oc apply -f quickstart/03-catalog/catalog-source.yaml
+
+```
+
+### Step 4: Verify
+
+1. Open the **OpenShift AI Dashboard**.
+2. Go to **Model Catalog**.
+3. Look for the **"Private Enterprise Registry"** tab.
+4. Deploy the **Granite-7B-Enterprise** model.
+
+---
+
+## 📂 Repository Structure
+
+```text
+/
+├── content/                  # Antora Course Source (Adoc files)
+│   └── modules/ROOT/pages/   # The actual learning content
+│
+├── quickstart/               # The Lab Code
+│   ├── 01-infrastructure/    # MySQL & MinIO YAMLs
+│   ├── 02-registration-code/ # Python Ingestion Scripts
+│   └── 03-catalog/           # Dashboard Integration YAML
+│
+└── playbook.yaml             # Antora Build Configuration
+
+```
+
+## 🛠 Troubleshooting
+
+* **Database Connection Failed?** Check `oc get secret model-registry-db-secret -n rhoai-model-registry`.
+* **Script Can't Connect?** Ensure you are running the python scripts from a terminal *inside* the cluster, OR use `oc port-forward` if running locally (see `troubleshooting.adoc`).
+
+```
+
+***
+
+### Next Steps for You
+This concludes the creation of the repository assets. You now have the full package:
+1.  **Course Content** (Adoc pages).
+2.  **Lab Infrastructure** (YAMLs & Setup Script).
+3.  **Automation Logic** (Python & Bash).
+4.  **Documentation** (README).
+
+Would you like me to finally generate the **`playbook.yaml`** so you can physically build this site, or is there anything else you need to refine?
+
+```

@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: private-registry-catalog-source
+  namespace: redhat-ods-applications # MUST be the namespace where RHOAI Dashboard is installed
+  labels:
+    opendatahub.io/dashboard: "true" # Required for discovery
+data:
+  # The key name 'service-config.yaml' is arbitrary but good practice
+  service-config.yaml: |
+    displayName: "Private Enterprise Registry"
+    description: "Approved models from the Internal AI Factory (Gold/Silver/Bronze)"
+    provider: "MyCompany Platform Engineering"
+    # The internal DNS to your Registry Service in the other namespace
+    serviceURL: "http://model-registry-service.rhoai-model-registry.svc.cluster.local:8080"
+    # We use the DB secret just as a placeholder for the token if auth is disabled
+    bearerTokenSecret: "model-registry-db-secret" 
+    supportedFormats:
+      - name: "safetensors"
+      - name: "onnx"
+      - name: "gguf"

@@ -37,11 +37,41 @@ This is the vault. It must be an S3-compatible object storage service.
  * **Security:** This bucket should be **private**. Only the specific Service Accounts used by your pipelines and serving runtimes should have read access.
  * **The "Golden Image" Concept:** Once a model version is uploaded here and registered, the file should be treated as **immutable**.
 
-=== 3. The Model Catalog (The UI Layer)
-This is the "Showroom" visible to Data Scientists in the RHOAI Dashboard.
+=== 3. The Model Catalog (The "Showroom")
+The Catalog is where Data Scientists browse available models. By default, it shows public models (Granite, Llama). To show *your* private models, we must explicitly connect the two.
 
- * **Technology:** A `ModelCatalogSource` Custom Resource (CR) in OpenShift.
- * **Function:** It polls the Registry Service. When a new model is registered with the state `production-approved`, the Catalog automatically updates to display a new card in the UI, making it available for one-click deployment.
+ * **The Mechanism:** The RHOAI Dashboard reads from **Catalog Sources**.
+ * **The Integration:** We will deploy a specific **`ModelCatalogSource`** (YAML) that connects to our Registry.
+ * **The Workflow:**
+    1. A model is registered in the **Model Registry** (Status: `Registered`).
+    2. We apply a `CatalogSource` configuration that references our Registry's API.
+    3. The Dashboard then renders a card for your private model, allowing users to deploy it just like a public Red Hat model.
+
+[%collapsible]
+====
+[source,bash]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: private-registry-config
+  namespace: redhat-ods-applications # The namespace where RHOAI Dashboard runs
+  labels:
+    opendatahub.io/dashboard: "true" # Required for the Dashboard to detect this config
+data:
+  # This section configures the connection between the UI and your Registry Service
+  service-config.yaml: |
+    displayName: "Private Enterprise Registry"
+    description: "Verified models for internal production use (Gold/Silver/Bronze)"
+    provider: "MyCompany AI Platform"
+    serviceURL: "http://model-registry-service.rhoai-model-registry.svc.cluster.local:8080"
+    bearerTokenSecret: "model-registry-token" # References the secret created in Step 1
+    supportedFormats:
+      - name: "safetensors"
+      - name: "onnx"
+      - name: "gguf"
+----
+====
 
 == The Data Flow: Lifecycle of a Model
 
@@ -69,13 +99,13 @@ Understanding this flow is critical for the hands-on lab you are about to perfor
 
 To build this architecture in the next module, your cluster must meet these minimums:
 
+|===
 | Component | Requirement | Role |
-| :--- | :--- | :--- |
-| **OpenShift AI** | v2.13+ or v3.0 | The Platform |
+| **OpenShift AI** | v3.0 | The Platform |
 | **Database** | MySQL v8.0 | Registry Backend |
 | **Storage** | MinIO (or S3) | Artifact Storage |
 | **Compute** | 2 vCPUs, 4GB RAM | For Registry & DB Pods |
-
+|===
 ---
 *Now that you understand the blueprint, it is time to pick up the tools.*
 

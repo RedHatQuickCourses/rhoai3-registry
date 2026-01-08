@@ -1,0 +1,4 @@
+boto3==1.34.0
+huggingface-hub==0.20.0
+model-registry==0.1.0 # The official Python client for RHOAI Registry
+requests==2.31.0

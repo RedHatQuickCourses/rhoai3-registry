@@ -1,0 +1,122 @@
+= Lab: Deploying Your AI Supply Chain
+:navtitle: The QuickStart Lab
+:toc: macro
+
+// Antora metadata
+:page-role: hands-on-lab
+:description: Step-by-step guide to deploying the Registry, ingesting a model, and connecting the Catalog.
+
+[.lead]
+*Theory is over. It is time to build.*
+
+In this lab, you will take on the role of a **Lead Platform Engineer**. Your Data Science team has been downloading models randomly from Hugging Face. Your task is to establish order by deploying a **Private Model Registry** and forcing all future deployments to go through this governed gate.
+
+[IMPORTANT]
+.Prerequisites
+====
+* **Cluster Access:** You are logged into an OpenShift AI 3.0 cluster via terminal (`oc login`).
+* **Permissions:** You have `cluster-admin` or sufficient namespace privileges.
+* **Repository:** You have cloned the course repository:
+  `git clone https://github.com/redhat-ai-services/rhoai-3-model-registry-quickstart.git`
+  `cd rhoai-3-model-registry-quickstart`
+====
+
+== Step 1: The Plumbing (Infrastructure)
+
+The Model Registry is stateless. Before we can turn it on, we need two things: a **Brain** (Database) and a **Vault** (Object Storage).
+
+We have provided a script that deploys a MySQL 8.0 instance and a MinIO object store into a new namespace called `rhoai-model-registry`.
+
+. **Run the Setup Script:**
++
+[source,bash]
+----
+./quickstart/01-infrastructure/setup.sh
+----
+
+. **Verify the Pods:**
+Ensure the database and storage are running before proceeding.
++
+[source,bash]
+----
+oc get pods -n rhoai-model-registry
+----
++
+*Expected Output:*
+----
+NAME                              READY   STATUS    RESTARTS   AGE
+mysql-5d8f7-xyz                   1/1     Running   0          45s
+minio-7b9c2-abc                   1/1     Running   0          45s
+model-registry-service-6f...      1/1     Running   0          20s
+----
+
+== Step 2: The Ingestion (Registering the "Gold" Model)
+
+Now that the registry is running, it is empty. We need to populate it.
+
+You will run a Python automation pipeline that mimics a secure supply chain:
+1.  **Downloads** the `granite-7b-lab` model from Hugging Face (or uses a cached local copy).
+2.  **Uploads** the weights to your private MinIO "Vault" (ensuring sovereignty).
+3.  **Registers** the metadata (Version 1.0.0, Author: You) into the MySQL "Brain."
+
+. **Install Dependencies (Optional):**
+If running locally, ensure you have the python clients installed.
++
+[source,bash]
+----
+pip install -r quickstart/02-registration-code/requirements.txt
+----
+
+. **Execute the Pipeline:**
++
+[source,bash]
+----
+./quickstart/02-registration-code/run_pipeline.sh
+----
+
+. **Observe the Output:**
+Watch the logs. You should see the "Handshake" happen:
++
+[source,text]
+----
+> Connecting to Hugging Face... Done.
+> Downloading 'granite-7b-lab'... Done.
+> Uploading to Private MinIO Bucket (s3://private-models)... Success.
+> Registering with Model Registry API...
+> SUCCESS: Model Registered with ID: 12345
+----
+
+== Step 3: The Payoff (Connecting the Catalog)
+
+At this moment, the model is safe in your registry, but the Data Scientists cannot see it yet. The **Model Catalog** in the RHOAI Dashboard is still showing only the public Red Hat default models.
+
+We need to apply the "Bridge" — the `ModelCatalogSource` configuration we discussed in the Architecture section.
+
+. **Apply the Catalog Configuration:**
++
+[source,bash]
+----
+oc apply -f quickstart/03-catalog/catalog-source.yaml
+----
+
+. **Verify the Link:**
++
+[source,bash]
+----
+oc get configmap -n redhat-ods-applications -l opendatahub.io/dashboard=true
+----
+
+== Step 4: Final Verification
+
+1.  Open your **Red Hat OpenShift AI Dashboard** in your browser.
+2.  Navigate to the **Model Catalog** tab in the left sidebar.
+3.  Look for a new section or tab (depending on UI version) labeled **"Private Enterprise Registry"**.
+4.  **Success:** You should see the card for **"Granite 7B Enterprise"**.
+5.  Click the card. Notice that the deployment source is **NOT** Hugging Face. It is your private S3 bucket URI.
+
+image::private-catalog-card.png[align="center", title="Your Private Model, Ready for Deployment"]
+
+---
+*Congratulations! You have successfully built a private AI Supply Chain. You are no longer dependent on public hubs.*
+
+xref:troubleshooting.adoc[Next: Troubleshooting & Day 2 Operations >]
