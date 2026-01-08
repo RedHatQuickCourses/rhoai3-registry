@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Troubleshooting &amp; Day 2 Operations :: Red Hat OpenShift AI (RHOAI) Model Registry</title>
+    <link rel="prev" href="section2.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Red Hat OpenShift AI (RHOAI) Model Registry</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="rhoai3-registry" data-version="1">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Red Hat OpenShift AI (RHOAI) Model Registry</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="index.html">Introduction &amp; Value</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="section1.html">Architecture Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="section2.html">The QuickStart Lab</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="section3.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Red Hat OpenShift AI (RHOAI) Model Registry</span>
+    <span class="version">1</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Red Hat OpenShift AI (RHOAI) Model Registry</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Red Hat OpenShift AI (RHOAI) Model Registry</a></li>
+    <li><a href="index.html">Introduction &amp; Value</a></li>
+    <li><a href="section3.html">Troubleshooting</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Troubleshooting &amp; Day 2 Operations</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph lead">
+<p><strong>A "Black Box" is a liability. You need to know how to look under the hood.</strong></p>
+</div>
+<div class="paragraph">
+<p>Even in a perfect "AI Factory," components will occasionally fail. A database password might rotate, an S3 bucket might become unreachable, or a model artifact might be corrupt.</p>
+</div>
+<div class="paragraph">
+<p>This section equips you with the <strong>SRE (Site Reliability Engineering) Playbook</strong> for the Model Registry.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_1_debugging_the_brain_registry_service"><a class="anchor" href="#_1_debugging_the_brain_registry_service"></a>1. Debugging the "Brain" (Registry Service)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If the Registry API is not responding, or if your Python scripts fail with <code>500 Internal Server Error</code>, start here.</p>
+</div>
+<div class="paragraph">
+<p><strong>Check 1: Is the Pod Running?</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -n rhoai-model-registry -l app=model-registry-service</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Status <code>CrashLoopBackOff</code>:</strong> Usually means the database connection failed.</p>
+</li>
+<li>
+<p><strong>Status <code>ImagePullBackOff</code>:</strong> Check your cluster&#8217;s internet connectivity or image registry credentials.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Check 2: The Logs (The Source of Truth)</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc logs -n rhoai-model-registry deployment/model-registry-service</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Look for:</strong> <code>Access denied for user</code>, <code>Connection refused</code>, or <code>Unknown database</code>.</p>
+</li>
+<li>
+<p><strong>Fix:</strong> Verify the <code>model-registry-db-secret</code> matches the actual MySQL credentials.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2_debugging_the_vault_storage_access"><a class="anchor" href="#_2_debugging_the_vault_storage_access"></a>2. Debugging the "Vault" (Storage Access)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If your Python script fails during the <strong>Upload</strong> phase, or if the RHOAI Dashboard shows a "Model Load Error" when deploying.</p>
+</div>
+<div class="paragraph">
+<p><strong>Check 1: Can the Registry see S3?</strong>
+The Registry Service needs to verify the S3 URI exists. If the networking is blocked, it will fail.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Exec into the registry pod to test connectivity
+oc rsh -n rhoai-model-registry deployment/model-registry-service curl -v http://minio.rhoai-model-registry.svc.cluster.local:9000/minio/health/live</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Expected:</strong> <code>HTTP/1.1 200 OK</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Check 2: Are the keys correct?</strong>
+A common mistake is a typo in the <code>aws_access_key_id</code> inside the secret.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get secret model-registry-s3-secret -n rhoai-model-registry -o jsonpath='{.data.aws_access_key_id}' | base64 -d</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_3_debugging_the_showroom_model_catalog"><a class="anchor" href="#_3_debugging_the_showroom_model_catalog"></a>3. Debugging the "Showroom" (Model Catalog)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you registered the model successfully (Python script said <code>SUCCESS</code>), but the card <strong>does not appear</strong> in the OpenShift AI Dashboard.</p>
+</div>
+<div class="paragraph">
+<p><strong>Check 1: Is the CatalogSource Valid?</strong>
+The Dashboard logs will complain if the YAML was malformed.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc logs -n redhat-ods-applications -l app=dashboard</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Grep for:</strong> <code>ModelCatalog</code>, <code>Error parsing</code>, or <code>unreachable</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Check 2: Caching Issues</strong>
+The Dashboard caches catalog data aggressively.
+* <strong>Fix:</strong> Delete the Dashboard pod to force a refresh.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc delete pod -n redhat-ods-applications -l app=dashboard</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_4_emergency_reset_the_nuke_it_option"><a class="anchor" href="#_4_emergency_reset_the_nuke_it_option"></a>4. Emergency Reset (The "Nuke It" Option)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If your environment is hopelessly tangled and you need to restart the lab from scratch:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># 1. Delete the Project (This kills everything: DB, MinIO, Registry)
+oc delete project rhoai-model-registry
+
+# 2. Re-run the Setup Script
+./quickstart/01-infrastructure/setup.sh</code></pre>
+</div>
+</div>
+<hr>
+<div class="paragraph">
+<p><strong>You now have the full lifecycle: Build, Operate, and Fix. You are ready to run the AI Factory.</strong></p>
+</div>
+<div class="paragraph">
+<p><a href="index.html" class="xref page">Return to Start</a></p>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="section2.html">The QuickStart Lab</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
