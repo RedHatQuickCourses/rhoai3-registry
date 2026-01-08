@@ -1,5 +1,5 @@
-name: REPLACEREPONAME
-title: FIXME Course Title
+name: rhoai3-registry
+title: Red Hat OpenShift AI (RHOAI) Model Registry
 version: 1
 nav:
 - modules/ROOT/nav.adoc

@@ -1,6 +1,82 @@
-= Section 1
+= Architecture: The AI Supply Chain
+:navtitle: Architecture Deep Dive
+:toc: macro
 
-* Create multiple copies of this section as needed.
-* Remove any unnecessary sections or chapter pages.
-* Customize the section as appropriate.
-* Ensure that each page contains a manageable amount of content.
+// Antora metadata
+:page-role: architecture-concept
+:description: Technical deep dive into the RHOAI Model Registry components, data flow, and separation of concerns.
+
+[.lead]
+*A "Registry" is not a "Repository." Understanding the difference is key to a scalable AI Platform.*
+
+To build a private AI factory, you must distinguish between **where the data lives** and **how the data is governed**. In Red Hat OpenShift AI (RHOAI), we decouple these two concerns to ensure performance, security, and flexibility.
+
+== The Core Concept: Decoupling Control vs. Data
+
+The RHOAI Model Registry architecture follows a "Split-Plane" design.
+
+ * **The Control Plane (The "Librarian"):** The Model Registry itself. It is a lightweight metadata service backed by a relational database (MySQL). It knows *about* the models (Author, Version, License, Metrics) but does not hold the files.
+ * **The Data Plane (The "Bookshelf"):** Your Object Storage (S3/MinIO/Ceph). This is where the heavy artifacts (Safetensors, ONNX files, configs) actually reside.
+
+
+== Component Breakdown
+
+=== 1. The Registry Service (Control Plane)
+This is the brain of the operation. It exposes a REST API that allows users and systems to register, query, and update model metadata.
+
+
+ * **Technology:** A Golang-based service managed by the `model-registry-operator`.
+ * **Backend:** Requires a MySQL 8.x or MariaDB database.
+ * **Function:** Enforces the schema. It ensures that every registered model has the required fields (e.g., you cannot register a model without a version number).
+
+=== 2. The Artifact Storage (Data Plane)
+This is the vault. It must be an S3-compatible object storage service.
+
+
+ * **Technology:** AWS S3, Red Hat Ceph Storage, or MinIO (for this lab).
+ * **Security:** This bucket should be **private**. Only the specific Service Accounts used by your pipelines and serving runtimes should have read access.
+ * **The "Golden Image" Concept:** Once a model version is uploaded here and registered, the file should be treated as **immutable**.
+
+=== 3. The Model Catalog (The UI Layer)
+This is the "Showroom" visible to Data Scientists in the RHOAI Dashboard.
+
+ * **Technology:** A `ModelCatalogSource` Custom Resource (CR) in OpenShift.
+ * **Function:** It polls the Registry Service. When a new model is registered with the state `production-approved`, the Catalog automatically updates to display a new card in the UI, making it available for one-click deployment.
+
+== The Data Flow: Lifecycle of a Model
+
+Understanding this flow is critical for the hands-on lab you are about to perform.
+
+1.  **Ingestion (The Download):**
+    * A Python script authenticates with Hugging Face (or another source).
+    * It downloads the raw files to a temporary workspace.
+
+2.  **Storage (The Push):**
+    * The script uploads the files to your private S3 bucket (e.g., `s3://my-private-models/granite-7b/v1/`).
+    * *Result:* The data is now safe and sovereign.
+
+3.  **Registration (The Stamp):**
+    * The script calls the Model Registry API.
+    * It sends a JSON payload: "I have a model named 'Granite', Version '1.0', located at 's3://...'"
+    * *Result:* The Registry generates a unique ID and stamps the entry.
+
+4.  **Discovery (The Consumption):**
+    * A Data Scientist opens the RHOAI Dashboard.
+    * They see the "Granite 7B" card.
+    * When they click "Deploy," RHOAI reads the S3 URI from the Registry and pulls the weights directly from your private bucket—**never** touching the public internet.
+
+== System Requirements for the Lab
+
+To build this architecture in the next module, your cluster must meet these minimums:
+
+| Component | Requirement | Role |
+| :--- | :--- | :--- |
+| **OpenShift AI** | v2.13+ or v3.0 | The Platform |
+| **Database** | MySQL v8.0 | Registry Backend |
+| **Storage** | MinIO (or S3) | Artifact Storage |
+| **Compute** | 2 vCPUs, 4GB RAM | For Registry & DB Pods |
+
+---
+*Now that you understand the blueprint, it is time to pick up the tools.*
+
+xref:quickstart.adoc[Next: The QuickStart Lab (Hands-On) >]
