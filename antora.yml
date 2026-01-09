@@ -2,5 +2,5 @@ name: rhoai3-registry
 title: Red Hat OpenShift AI (RHOAI) Model Registry
 version: 1
 nav:
-- modules/chapter1/nav.adoc
+- modules/ROOT/nav.adoc
 
