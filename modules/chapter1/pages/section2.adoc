@@ -17,8 +17,8 @@ In this lab, you will take on the role of a **Lead Platform Engineer**. Your Dat
 * **Cluster Access:** You are logged into an OpenShift AI 3.0 cluster via terminal (`oc login`).
 * **Permissions:** You have `cluster-admin` or sufficient namespace privileges.
 * **Repository:** You have cloned the course repository:
-  `git clone https://github.com/redhat-ai-services/rhoai-3-model-registry-quickstart.git`
-  `cd rhoai-3-model-registry-quickstart`
+  `git clone https://github.com/RedHatQuickCourses/rhoai3-registry.git`
+  `cd rhoai3-registry/`
 ====
 
 == Step 1: The Plumbing (Infrastructure)
@@ -55,9 +55,10 @@ model-registry-service-6f...      1/1     Running   0          20s
 Now that the registry is running, it is empty. We need to populate it.
 
 You will run a Python automation pipeline that mimics a secure supply chain:
-1.  **Downloads** the `granite-7b-lab` model from Hugging Face (or uses a cached local copy).
-2.  **Uploads** the weights to your private MinIO "Vault" (ensuring sovereignty).
-3.  **Registers** the metadata (Version 1.0.0, Author: You) into the MySQL "Brain."
+
+ 1.  **Downloads** the `granite-7b-lab` model from Hugging Face (or uses a cached local copy).
+ 2.  **Uploads** the weights to your private MinIO "Vault" (ensuring sovereignty).
+ 3.  **Registers** the metadata (Version 1.0.0, Author: You) into the MySQL "Brain."
 
 . **Install Dependencies (Optional):**
 If running locally, ensure you have the python clients installed.
