@@ -1,6 +1,6 @@
 site:
   title: Red Hat OpenShift AI (RHOAI) Model Registry
-  start_page: rhoai3-registry::index.adoc
+  start_page: rhoai3-registry::chapter1::index.adoc
 
 content:
   sources:

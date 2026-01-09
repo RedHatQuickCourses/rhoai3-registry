@@ -109,4 +109,4 @@ To build this architecture in the next module, your cluster must meet these mini
 ---
 *Now that you understand the blueprint, it is time to pick up the tools.*
 
-xref:quickstart.adoc[Next: The QuickStart Lab (Hands-On) >]
+xref:section2.adoc[Next: The QuickStart Lab (Hands-On) >]

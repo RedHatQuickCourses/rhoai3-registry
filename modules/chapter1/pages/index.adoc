@@ -76,4 +76,4 @@ To successfully complete the hands-on sections of this course, you need:
 ---
 *Ready to build? Let's start by laying the foundation.*
 
-xref:architecture.adoc[Next: Understanding the Architecture >]
+xref:section1.adoc[Next: Understanding the Architecture >]
