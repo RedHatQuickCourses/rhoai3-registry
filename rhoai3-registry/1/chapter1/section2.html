@@ -117,8 +117,8 @@
 </li>
 <li>
 <p><strong>Repository:</strong> You have cloned the course repository:
-<code>git clone <a href="https://github.com/redhat-ai-services/rhoai-3-model-registry-quickstart.git" class="bare">https://github.com/redhat-ai-services/rhoai-3-model-registry-quickstart.git</a></code>
-<code>cd rhoai-3-model-registry-quickstart</code></p>
+<code>git clone <a href="https://github.com/RedHatQuickCourses/rhoai3-registry.git" class="bare">https://github.com/RedHatQuickCourses/rhoai3-registry.git</a></code>
+<code>cd rhoai3-registry/</code></p>
 </li>
 </ul>
 </div>
@@ -178,11 +178,18 @@ model-registry-service-6f...      1/1     Running   0          20s</pre>
 <p>Now that the registry is running, it is empty. We need to populate it.</p>
 </div>
 <div class="paragraph">
-<p>You will run a Python automation pipeline that mimics a secure supply chain:
-1.  <strong>Downloads</strong> the <code>granite-7b-lab</code> model from Hugging Face (or uses a cached local copy).
-2.  <strong>Uploads</strong> the weights to your private MinIO "Vault" (ensuring sovereignty).
-3.  <strong>Registers</strong> the metadata (Version 1.0.0, Author: You) into the MySQL "Brain."</p>
+<p>You will run a Python automation pipeline that mimics a secure supply chain:</p>
 </div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Downloads</strong> the <code>granite-7b-lab</code> model from Hugging Face (or uses a cached local copy).</p>
+</li>
+<li>
+<p><strong>Uploads</strong> the weights to your private MinIO "Vault" (ensuring sovereignty).</p>
+</li>
+<li>
+<p><strong>Registers</strong> the metadata (Version 1.0.0, Author: You) into the MySQL "Brain."</p>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -213,6 +220,9 @@ Watch the logs. You should see the "Handshake" happen:</p>
 &gt; Registering with Model Registry API...
 &gt; SUCCESS: Model Registered with ID: 12345</code></pre>
 </div>
+</div>
+</li>
+</ol>
 </div>
 </li>
 </ol>
