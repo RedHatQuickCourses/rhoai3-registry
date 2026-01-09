@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>An Example Quick Course :: Red Hat OpenShift AI (RHOAI) Model Registry</title>
-    <link rel="next" href="chapter1/index.html">
+    <title>The AI Supply Chain: From Shadow IT to Trusted Assets :: Red Hat OpenShift AI (RHOAI) Model Registry</title>
+    <link rel="next" href="chapter1/section1.html">
     <meta name="generator" content="Antora 3.1.3">
     <link rel="stylesheet" href="../../_/css/site.css">
     <script>var uiRootPath = '../../_'</script>
@@ -38,20 +38,17 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="index.html">Introduction &amp; Value</a>
+  </li>
   <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="chapter1/index.html">Introduction &amp; Value</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
     <a class="nav-link" href="chapter1/section1.html">Architecture Deep Dive</a>
   </li>
-  <li class="nav-item" data-depth="2">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="chapter1/section2.html">The QuickStart Lab</a>
   </li>
-  <li class="nav-item" data-depth="2">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="chapter1/section3.html">Troubleshooting</a>
-  </li>
-</ul>
   </li>
 </ul>
   </li>
@@ -83,7 +80,7 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="index.html">Red Hat OpenShift AI (RHOAI) Model Registry</a></li>
-    <li><a href="index.html">An Example Quick Course</a></li>
+    <li><a href="index.html">Introduction &amp; Value</a></li>
   </ul>
 </nav>
 </div>
@@ -92,66 +89,175 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">An Example Quick Course</h1>
+<h1 class="page">The AI Supply Chain: From Shadow IT to Trusted Assets</h1>
+<h1 id="_the_ai_supply_chain_from_shadow_it_to_trusted_assets" class="sect0"><a class="anchor" href="#_the_ai_supply_chain_from_shadow_it_to_trusted_assets"></a>The AI Supply Chain: From Shadow IT to Trusted Assets</h1>
+<div class="paragraph lead">
+<p><strong>Stop treating AI like a Science Fair. Start building a Factory.</strong></p>
+</div>
+<div class="paragraph">
+<p>In the world of software development, no enterprise would allow developers to email zip files of source code to one another. We use Git. We use version control. We use pipelines.</p>
+</div>
+<div class="paragraph">
+<p>Yet, in the world of Artificial Intelligence, this "Wild West" approach is exactly what is happening today. Data Scientists download gigabytes of open-source models (LLMs) to personal laptops, store weights in random S3 buckets, and deploy "magic black boxes" with no history, no lineage, and no security audit.</p>
+</div>
+<div class="paragraph">
+<p>This is <strong>Shadow AI</strong>. And it is the primary blocker to enterprise adoption.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="title">The Core Sales Objection</div>
+<div class="paragraph">
+<p><strong>"Why should we build a private Model Registry when we can just use Hugging Face or public APIs?"</strong></p>
+</div>
+<div class="paragraph">
+<p><strong>The Answer:</strong> Because you cannot govern what you do not own. Public hubs are for <strong>discovery</strong>; your Private Registry is for <strong>control, sovereignty, and compliance.</strong></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <div class="sect1">
-<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>Introduction</h2>
+<h2 id="_the_solution_the_model_registry"><a class="anchor" href="#_the_solution_the_model_registry"></a>The Solution: The Model Registry</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Course Title: Course title FIXME</p>
+<p>The <strong>Red Hat OpenShift AI (RHOAI) Model Registry</strong> is the "Title Office" for your organization&#8217;s intellectual property. It transforms a scattered collection of model files into a governed <strong>AI Supply Chain</strong>.</p>
 </div>
 <div class="paragraph">
-<p>Description:
-Course description FIXME</p>
+<p>It serves as the bridge between the chaotic world of experimentation and the rigid world of production operations.</p>
 </div>
-<div class="paragraph">
-<p>Duration: FIXME hours</p>
+<div class="imageblock text-center unresolved">
+<div class="content">
+<img src="aisupplychain.jpeg" alt="aisupplychain">
+</div>
+<div class="title">Figure 1. The Registry as the Central Hub of the AI Factory</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_objectives"><a class="anchor" href="#_objectives"></a>Objectives</h2>
+<h2 id="_three_pillars_of_value"><a class="anchor" href="#_three_pillars_of_value"></a>Three Pillars of Value</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>On completing this course, you should be able to:</p>
+<p>By implementing the Model Registry, you unlock three critical capabilities that "cheap public APIs" cannot provide:</p>
+</div>
+<div class="sect2">
+<h3 id="_1_sovereignty_security_the_vault"><a class="anchor" href="#_1_sovereignty_security_the_vault"></a>1. Sovereignty &amp; Security ("The Vault")</h3>
+<div class="paragraph">
+<p>When you rely on public APIs, your data leaves your perimeter. When you rely on public model hubs, you are dependent on their uptime and their policy changes.</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Observable, measurable objective&#8230;&#8203;</p>
+<p><strong>The Win:</strong> The Model Registry keeps the model weights and metadata strictly within your Hybrid Cloud environment.</p>
 </li>
 <li>
-<p>Observable, measurable objective&#8230;&#8203;</p>
+<p><strong>The Benefit:</strong> You have a disconnected, air-gapped ready "Vault" that ensures your proprietary fine-tuned models never leak.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_2_efficiency_reuse_the_single_source_of_truth"><a class="anchor" href="#_2_efficiency_reuse_the_single_source_of_truth"></a>2. Efficiency &amp; Reuse ("The Single Source of Truth")</h3>
+<div class="paragraph">
+<p>Without a registry, five different teams might download <code>Llama-3-7b</code> five different times, uploading copies to five different S3 buckets. This creates "Model Drift," where no one knows if they are using the exact same weights.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>The Win:</strong> The Registry enforces a <strong>"Golden Reference."</strong></p>
 </li>
 <li>
-<p>Observable, measurable objective&#8230;&#8203;</p>
+<p><strong>The Mechanism:</strong> The Registry does not store the massive model files itself. Instead, it acts as the <strong>authoritative pointer</strong>. It holds the immutable URI (e.g., <code>s3://prod-models/granite-7b-v1/</code>) and the cryptographic hash of the model.</p>
+</li>
+<li>
+<p><strong>The Benefit:</strong> When a Platform Engineer deploys to the Edge or Cloud, they query the Registry for the "Production" tag. The Registry directs them to the single, approved object in your secure storage. You build the configuration once, and the Registry ensures every deployment uses the exact same asset.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_3_governance_lineage_the_audit_trail"><a class="anchor" href="#_3_governance_lineage_the_audit_trail"></a>3. Governance &amp; Lineage ("The Audit Trail")</h3>
+<div class="paragraph">
+<p>In regulated industries (Finance, Healthcare, Public Sector), you must answer the question: <strong>"Who deployed this AI, and what data was it trained on?"</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>The Win:</strong> Every model version is stamped with metadata: Author, License, Source URI, and Performance Metrics.</p>
+</li>
+<li>
+<p><strong>The Benefit:</strong> You achieve compliance by default. You can trace a hallucinating model in production back to the exact training set and developer who registered it.</p>
 </li>
 </ul>
 </div>
 </div>
 </div>
+</div>
 <div class="sect1">
-<h2 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h2>
+<h2 id="_your_mission_build_the_factory"><a class="anchor" href="#_your_mission_build_the_factory"></a>Your Mission: Build the Factory</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This course assumes that you have the following prior experience:</p>
+<p>In this course, you will not just read about the registry; you will <strong>build one</strong>. You will take on the role of a Platform Engineer tasked with bringing order to a chaotic data science team.</p>
+</div>
+<div class="paragraph">
+<p><strong>You will execute the following Technical Workflow:</strong></p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>The Infrastructure:</strong> Deploy the backing services (MySQL &amp; Object Storage) required to power the registry.</p>
+</li>
+<li>
+<p><strong>The Ingestion:</strong> Use Python code to fetch a model from Hugging Face and formally "Register" it with versioned metadata.</p>
+</li>
+<li>
+<p><strong>The Payoff:</strong> Connect your Private Registry to the <strong>Model Catalog</strong>, making your secure model available for one-click deployment by business users.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="title">Prerequisites</div>
+<div class="paragraph">
+<p>To successfully complete the hands-on sections of this course, you need:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Course or experience&#8230;&#8203;</p>
+<p>Access to a <strong>Red Hat OpenShift AI 3.0</strong> cluster.</p>
 </li>
 <li>
-<p>Course or experience&#8230;&#8203;</p>
+<p><code>cluster-admin</code> privileges (to install the Registry Operator and Dependencies).</p>
 </li>
 <li>
-<p>Course or experience&#8230;&#8203;</p>
+<p>The <code>oc</code> CLI tool installed in your terminal.</p>
 </li>
 </ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<hr>
+<div class="paragraph">
+<p><strong>Ready to build? Let&#8217;s start by laying the foundation.</strong></p>
+</div>
+<div class="paragraph">
+<p><a href="#section1.adoc" class="xref unresolved">Next: Understanding the Architecture &gt;</a></p>
 </div>
 </div>
 </div>
 <nav class="pagination">
-  <span class="next"><a href="chapter1/index.html">Introduction &amp; Value</a></span>
+  <span class="next"><a href="chapter1/section1.html">Architecture Deep Dive</a></span>
 </nav>
 </article>
   </div>
