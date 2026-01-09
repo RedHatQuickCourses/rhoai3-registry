@@ -222,7 +222,7 @@ data:
     description: "Verified models for internal production use (Gold/Silver/Bronze)"
     provider: "MyCompany AI Platform"
     serviceURL: "http://model-registry-service.rhoai-model-registry.svc.cluster.local:8080"
-    bearerTokenSecret: "model-registry-token" # References the secret created in Step 1
+    bearerTokenSecret: "model-registry-db-secret" # References the secret created in Step 1
     supportedFormats:
       - name: "safetensors"
       - name: "onnx"

@@ -172,7 +172,7 @@ The Registry Service needs to verify the S3 URI exists. If the networking is blo
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Exec into the registry pod to test connectivity
-oc rsh -n rhoai-model-registry deployment/model-registry-service curl -v http://minio.rhoai-model-registry.svc.cluster.local:9000/minio/health/live</code></pre>
+oc rsh -n rhoai-model-registry deployment/model-registry-service curl -v http://minio-service.rhoai-model-registry.svc.cluster.local:9000/minio/health/live</code></pre>
 </div>
 </div>
 <div class="ulist">
@@ -239,7 +239,7 @@ The Dashboard caches catalog data aggressively.
 oc delete project rhoai-model-registry
 
 # 2. Re-run the Setup Script
-./quickstart/01-infrastructure/setup.sh</code></pre>
+./deploy/setup.sh</code></pre>
 </div>
 </div>
 <hr>
