@@ -39,8 +39,8 @@ fi
 echo "----------------------------------------------------------------"
 echo "Step 2: Deploying MinIO Object Storage (The Vault)..."
 # We apply the folder containing Deployment, PVC, Service, and Route
-if [ -d "quickstart/01-infrastructure/minio" ]; then
-    oc apply -f quickstart/01-infrastructure/minio/ -n "$NAMESPACE"
+if [ -d "deploy/infrastructure/minio" ]; then
+    oc apply -f deploy/infrastructure/minio/ -n "$NAMESPACE"
 else
     echo "❌ Error: MinIO YAML directory not found!"
     exit 1
@@ -52,8 +52,8 @@ fi
 echo "----------------------------------------------------------------"
 echo "Step 3: Deploying MySQL Database (The Brain)..."
 # We apply the folder containing Deployment, PVC, Service, and Secret
-if [ -d "quickstart/01-infrastructure/mysql" ]; then
-    oc apply -f quickstart/01-infrastructure/mysql/ -n "$NAMESPACE"
+if [ -d "deploy/infrastructure/mysql" ]; then
+    oc apply -f deploy/infrastructure/mysql/ -n "$NAMESPACE"
 else
     echo "❌ Error: MySQL YAML directory not found!"
     exit 1
@@ -82,7 +82,7 @@ echo "➤ Creating 'model-registry-s3-secret'..."
 oc create secret generic model-registry-s3-secret \
     --from-literal=aws_access_key_id="$MINIO_ACCESS_KEY" \
     --from-literal=aws_secret_access_key="$MINIO_SECRET_KEY" \
-    --from-literal=endpoint_url="http://minio.$NAMESPACE.svc.cluster.local:9000" \
+    --from-literal=endpoint_url="http://minio-service.$NAMESPACE.svc.cluster.local:9000" \
     --from-literal=region="us-east-1" \
     --from-literal=bucket="private-models" \
     -n "$NAMESPACE" \

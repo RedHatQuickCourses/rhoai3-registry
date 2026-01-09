@@ -6,10 +6,10 @@ from botocore.client import Config
 # --- CONFIGURATION (Defaults for In-Cluster Execution) ---
 MODEL_ID = os.getenv("MODEL_ID", "ibm-granite/granite-7b-lab")
 # Internal K8s DNS for MinIO Service
-S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://minio.rhoai-model-registry.svc.cluster.local:9000")
+S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://minio-service.rhoai-model-registry.svc.cluster.local:9000")
 S3_BUCKET = os.getenv("S3_BUCKET", "private-models")
-AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY", "minioadmin")
-AWS_SECRET_KEY = os.getenv("AWS_SECRET_KEY", "minioadmin")
+AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY", "minio")
+AWS_SECRET_KEY = os.getenv("AWS_SECRET_KEY", "minio123")
 
 def upload_to_s3(local_path, s3_prefix):
     print(f"--> Connecting to Private Vault at {S3_ENDPOINT}...")

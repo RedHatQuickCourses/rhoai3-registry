@@ -42,7 +42,7 @@ The Registry Service needs to verify the S3 URI exists. If the networking is blo
 [source,bash]
 ----
 # Exec into the registry pod to test connectivity
-oc rsh -n rhoai-model-registry deployment/model-registry-service curl -v http://minio.rhoai-model-registry.svc.cluster.local:9000/minio/health/live
+oc rsh -n rhoai-model-registry deployment/model-registry-service curl -v http://minio-service.rhoai-model-registry.svc.cluster.local:9000/minio/health/live
 ----
 * *Expected:* `HTTP/1.1 200 OK`
 
@@ -83,7 +83,7 @@ If your environment is hopelessly tangled and you need to restart the lab from s
 oc delete project rhoai-model-registry
 
 # 2. Re-run the Setup Script
-./quickstart/01-infrastructure/setup.sh
+./deploy/setup.sh
 ----
 
 ---

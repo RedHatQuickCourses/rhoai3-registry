@@ -58,7 +58,7 @@ If you are an experienced Platform Engineer and just want to deploy the solution
 Create the namespace, MySQL database, and MinIO object storage.
 
 ```bash
-./quickstart/01-infrastructure/setup.sh
+./deploy/setup.sh
 
 ```
 
@@ -74,10 +74,10 @@ Run the automated pipeline to:
 
 ```bash
 # Install dependencies (if needed)
-pip install -r quickstart/02-registration-code/requirements.txt
+pip install -r deploy/registration/requirements.txt
 
 # Run the pipeline (Internal DNS Mode)
-./quickstart/02-registration-code/run_pipeline.sh
+./deploy/run_pipeline.sh
 
 ```
 
@@ -86,7 +86,7 @@ pip install -r quickstart/02-registration-code/requirements.txt
 Apply the configuration that tells the RHOAI Dashboard to display your private registry models.
 
 ```bash
-oc apply -f quickstart/03-catalog/catalog-source.yaml
+oc apply -f deploy/catalog/catalog-source.yaml
 
 ```
 
@@ -103,15 +103,15 @@ oc apply -f quickstart/03-catalog/catalog-source.yaml
 
 ```text
 /
-├── content/                  # Antora Course Source (Adoc files)
-│   └── modules/ROOT/pages/   # The actual learning content
+├── modules/                  # Antora Course Source (Adoc files)
+│   └── ROOT/pages/           # The actual learning content
 │
-├── quickstart/               # The Lab Code
-│   ├── 01-infrastructure/    # MySQL & MinIO YAMLs
-│   ├── 02-registration-code/ # Python Ingestion Scripts
-│   └── 03-catalog/           # Dashboard Integration YAML
+├── deploy/                   # The Lab Code
+│   ├── infrastructure/       # MySQL & MinIO YAMLs
+│   ├── registration/         # Python Ingestion Scripts
+│   └── catalog/              # Dashboard Integration YAML
 │
-└── playbook.yaml             # Antora Build Configuration
+└── antora-playbook.yml       # Antora Build Configuration
 
 ```
 

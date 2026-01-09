@@ -31,7 +31,7 @@ We have provided a script that deploys a MySQL 8.0 instance and a MinIO object s
 +
 [source,bash]
 ----
-./quickstart/01-infrastructure/setup.sh
+./deploy/setup.sh
 ----
 
 . **Verify the Pods:**
@@ -64,14 +64,14 @@ If running locally, ensure you have the python clients installed.
 +
 [source,bash]
 ----
-pip install -r quickstart/02-registration-code/requirements.txt
+pip install -r deploy/registration/requirements.txt
 ----
 
 . **Execute the Pipeline:**
 +
 [source,bash]
 ----
-./quickstart/02-registration-code/run_pipeline.sh
+./deploy/run_pipeline.sh
 ----
 
 . **Observe the Output:**
@@ -96,7 +96,7 @@ We need to apply the "Bridge" — the `ModelCatalogSource` configuration we disc
 +
 [source,bash]
 ----
-oc apply -f quickstart/03-catalog/catalog-source.yaml
+oc apply -f deploy/catalog/catalog-source.yaml
 ----
 
 . **Verify the Link:**
