@@ -1,4 +1,4 @@
-= The AI Supply Chain: From Shadow IT to Trusted Assets
+= Making the RHOAI Model Registry Work for You
 :navtitle: Home
 :toc: macro
 
