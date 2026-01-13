@@ -57,7 +57,7 @@ s3-ui-6d8f-rst.                   1/1     Running   0          20s
 
 == Step 2: The Ingestion (Registering the "Gold" Model)
 
-Now that the registry is running, it is empty. We need to populate it.
+Now that the database is running, it is empty. We need to setup the model registry in RHOAI UI.
 
 You will run a Python automation pipeline that mimics a secure supply chain:
 

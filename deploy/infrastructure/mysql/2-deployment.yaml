@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql
-  namespace: rhoai-model-registry
+  namespace: rhoai-model-registry-lab
   labels:
     app.openshift.io/runtime: mysql-database
 spec:
