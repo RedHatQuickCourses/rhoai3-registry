@@ -1,21 +1,64 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: private-registry-catalog-source
-  namespace: redhat-ods-applications # MUST be the namespace where RHOAI Dashboard is installed
-  labels:
-    opendatahub.io/dashboard: "true" # Required for discovery
+  name: model-catalog-sources
+  namespace: rhoai-model-registries
 data:
-  # The key name 'service-config.yaml' is arbitrary but good practice
-  service-config.yaml: |
-    displayName: "Private Enterprise Registry"
-    description: "Approved models from the Internal AI Factory (Gold/Silver/Bronze)"
-    provider: "MyCompany Platform Engineering"
-    # The internal DNS to your Registry Service in the other namespace
-    serviceURL: "http://model-registry-service.rhoai-model-registry.svc.cluster.local:8080"
-    # We use the DB secret just as a placeholder for the token if auth is disabled
-    bearerTokenSecret: "model-registry-db-secret" 
-    supportedFormats:
-      - name: "safetensors"
-      - name: "onnx"
-      - name: "gguf"
+  # ---------------------------------------------------------
+  # FILE 1: Master Configuration
+  # Defines two separate sources that will appear in the UI dropdown.
+  # ---------------------------------------------------------
+  sources.yaml: |
+    catalogs:
+      # Source A: Training Lab
+      - name: "Training Lab Models"
+        id: "source-lab"
+        type: "yaml"
+        properties:
+          yamlCatalogPath: "/data/user-sources/lab-models.yaml"
+
+      # Source B: Production
+      - name: "Production Certified"
+        id: "source-prod"
+        type: "yaml"
+        properties:
+          yamlCatalogPath: "/data/user-sources/prod-models.yaml"
+
+  # ---------------------------------------------------------
+  # FILE 2: Lab Models Data
+  # ---------------------------------------------------------
+  lab-models.yaml: |
+    models:
+      - name: "phi-2-candidate"
+        description: "Experimental Phi-2 model for training"
+        customProperties:
+          model_type:
+            metadataType: MetadataStringValue
+            string_value: "generative"
+          status:
+            metadataType: MetadataStringValue
+            string_value: "experimental"
+        artifacts:
+          - name: "artifact-v1"
+            uri: "hf://microsoft/phi-2"
+
+  # ---------------------------------------------------------
+  # FILE 3: Production Models Data
+  # ---------------------------------------------------------
+  prod-models.yaml: |
+    models:
+      - name: "granite-7b-prod"
+        description: "Certified IBM Granite Model - Production Ready"
+        customProperties:
+          model_type:
+            metadataType: MetadataStringValue
+            string_value: "generative"
+          status:
+            metadataType: MetadataStringValue
+            string_value: "certified"
+          license:
+            metadataType: MetadataStringValue
+            string_value: "Apache-2.0"
+        artifacts:
+          - name: "artifact-prod"
+            uri: "hf://ibm-granite/granite-7b-base"

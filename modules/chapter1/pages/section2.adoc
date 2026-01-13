@@ -35,6 +35,7 @@ We have provided a script that deploys a MySQL 8.0 instance and a MinIO object s
 +
 [source,bash]
 ----
+chmod u+x ./deploy/setup.sh \
 ./deploy/setup.sh
 ----
 
@@ -51,7 +52,7 @@ oc get pods -n rhoai-model-registry
 NAME                              READY   STATUS    RESTARTS   AGE
 mysql-5d8f7-xyz                   1/1     Running   0          45s
 minio-7b9c2-abc                   1/1     Running   0          45s
-model-registry-service-6f...      1/1     Running   0          20s
+s3-ui-6d8f-rst.                   1/1     Running   0          20s
 ----
 
 == Step 2: The Ingestion (Registering the "Gold" Model)
