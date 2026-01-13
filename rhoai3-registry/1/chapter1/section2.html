@@ -119,9 +119,13 @@
 <p><strong>Permissions:</strong> You have <code>cluster-admin</code> or sufficient namespace privileges.</p>
 </li>
 <li>
-<p><strong>Repository:</strong> You have cloned the course repository:
-<code>git clone <a href="https://github.com/RedHatQuickCourses/rhoai3-registry.git" class="bare">https://github.com/RedHatQuickCourses/rhoai3-registry.git</a></code>
-<code>cd rhoai3-registry/</code></p>
+<p><strong>Repository:</strong> You have cloned the course repository:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">  git clone https://github.com/RedHatQuickCourses/rhoai3-registry.git
+  cd rhoai3-registry/</code></pre>
+</div>
+</div>
 </li>
 </ul>
 </div>
@@ -138,7 +142,7 @@
 <p>The Model Registry is stateless. Before we can turn it on, we need two things: a <strong>Brain</strong> (Database) and a <strong>Vault</strong> (Object Storage).</p>
 </div>
 <div class="paragraph">
-<p>We have provided a script that deploys a MySQL 8.0 instance and a MinIO object store into a new namespace called <code>rhoai-model-registry</code>.</p>
+<p>We have provided a script that deploys a MySQL 8.0 instance and a MinIO object store into a new namespace called <code>rhoai-model-registry-lab</code>.</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">

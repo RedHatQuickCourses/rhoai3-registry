@@ -100,7 +100,7 @@
 <p><strong>A "Registry" is not a "Repository." Understanding the difference is key to a scalable AI Platform.</strong></p>
 </div>
 <div class="paragraph">
-<p>To build a private AI factory, you must distinguish between <strong>where the data lives</strong> and <strong>how the data is governed</strong>. In Red Hat OpenShift AI (RHOAI), we decouple these two concerns to ensure performance, security, and flexibility.</p>
+<p>To build a private AI Factory, you must distinguish between <strong>where the data lives</strong> and <strong>how the data is governed</strong>. In Red Hat OpenShift AI (RHOAI), we decouple these two concerns to ensure performance, security, and flexibility.</p>
 </div>
 </div>
 </div>
@@ -108,15 +108,15 @@
 <h2 id="_the_core_concept_decoupling_control_vs_data"><a class="anchor" href="#_the_core_concept_decoupling_control_vs_data"></a>The Core Concept: Decoupling Control vs. Data</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The RHOAI Model Registry architecture follows a "Split-Plane" design.</p>
+<p>The RHOAI Model Registry architecture follows a "split-plane" design.</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>The Control Plane (The "Librarian"):</strong> The Model Registry itself. It is a lightweight metadata service backed by a relational database (MySQL). It knows <strong>about</strong> the models (Author, Version, License, Metrics) but does not hold the files.</p>
+<p><strong>The Control Plane (The "Librarian"):</strong> The <strong>Model Registry</strong> itself. It is a lightweight metadata service backed by a relational database (MySQL). It knows <strong>about</strong> the models (Author, Version, License, Metrics) but does not hold the files.</p>
 </li>
 <li>
-<p><strong>The Data Plane (The "Bookshelf"):</strong> Your Object Storage (S3/MinIO/Ceph). This is where the heavy artifacts (Safetensors, ONNX files, configs) actually reside.</p>
+<p><strong>The Data Plane (The "Bookshelf"):</strong> Your object storage (S3/MinIO/Quay/Ceph). This is where the heavy artifacts (Safetensors, ONNX files, configs) actually reside.</p>
 </li>
 </ul>
 </div>
@@ -166,7 +166,7 @@
 <div class="sect2">
 <h3 id="_3_the_model_catalog_the_showroom"><a class="anchor" href="#_3_the_model_catalog_the_showroom"></a>3. The Model Catalog (The "Showroom")</h3>
 <div class="paragraph">
-<p>The Catalog is where Data Scientists browse available models. By default, it shows public models (Granite, Llama). To show <strong>your</strong> private models, we must explicitly connect the two.</p>
+<p>The Catalog is where AI Developers and Data Scientists browse available models. By default, it shows Red Hat Validated (ready for inference) and Red Hat AI models (ready for tuning pipeline). You&#8217;ll find model like (Granite, DeepSeekR1 and Llama). To show <strong>your</strong> private models, we must explicitly connect the two.</p>
 </div>
 <div class="ulist">
 <ul>
@@ -174,20 +174,18 @@
 <p><strong>The Mechanism:</strong> The RHOAI Dashboard reads from <strong>Catalog Sources</strong>.</p>
 </li>
 <li>
-<p><strong>The Integration:</strong> We will deploy a specific <strong><code>ModelCatalogSource</code></strong> (YAML) that connects to our Registry.</p>
+<p><strong>The Integration:</strong> The Model Catalog does not use a database for configuration; it uses a Kubernetes <strong>ConfigMap</strong>. You will edit this object directly to add your model details.</p>
 </li>
 <li>
-<p><strong>The Workflow:</strong></p>
+<p><strong>The Workflow:</strong>
+You need to define two logical "files" inside this ConfigMap:</p>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>A model is registered in the <strong>Model Registry</strong> (Status: <code>Registered</code>).</p>
+<p><strong><code>sources.yaml</code></strong>: Registers your custom catalog path.</p>
 </li>
 <li>
-<p>We apply a <code>CatalogSource</code> configuration that references our Registry&#8217;s API.</p>
-</li>
-<li>
-<p>The Dashboard then renders a card for your private model, allowing users to deploy it just like a public Red Hat model.</p>
+<p><strong><code>my-models.yaml</code></strong>: Contains the actual metadata for your models.</p>
 </li>
 </ol>
 </div>
@@ -202,22 +200,37 @@
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: private-registry-config
-  namespace: redhat-ods-applications # The namespace where RHOAI Dashboard runs
-  labels:
-    opendatahub.io/dashboard: "true" # Required for the Dashboard to detect this config
+  name: model-catalog-sources
+  namespace: rhoai-model-registries
 data:
-  # This section configures the connection between the UI and your Registry Service
-  service-config.yaml: |
-    displayName: "Private Enterprise Registry"
-    description: "Verified models for internal production use (Gold/Silver/Bronze)"
-    provider: "MyCompany AI Platform"
-    serviceURL: "http://model-registry-service.rhoai-model-registry.svc.cluster.local:8080"
-    bearerTokenSecret: "model-registry-db-secret" # References the secret created in Step 1
-    supportedFormats:
-      - name: "safetensors"
-      - name: "onnx"
-      - name: "gguf"</code></pre>
+  # FILE 1: The Main Config - Points to your custom file
+  sources.yaml: |
+    catalogs:
+      - name: "Model-Registry-Models"
+        id: "registry-custom-models"
+        type: "yaml"
+        properties:
+          yamlCatalogPath: "/data/user-sources/registry-models.yaml"
+
+  # FILE 2: Your Model Definitions (Add models here)
+  registry-models.yaml: |
+    models:
+      # --- MODEL 1: IBM Granite ---
+      - name: "granite-3.0-2b-instruct"
+        description: "IBM Granite Small Language Model"
+        customProperties:
+          model_type:
+            metadataType: MetadataStringValue
+            string_value: "generative"
+          author:
+            metadataType: MetadataStringValue
+            string_value: "IBM"
+          version:
+            metadataType: MetadataStringValue
+            string_value: "1.0"
+        artifacts:
+          - name: "model-artifact"
+            uri: "oci://quay.io/redhat-ai-services/modelcar-catalog:granite-3.0-2b-instruct"</code></pre>
 </div>
 </div>
 </div>
@@ -229,7 +242,7 @@ data:
 <h2 id="_the_data_flow_lifecycle_of_a_model"><a class="anchor" href="#_the_data_flow_lifecycle_of_a_model"></a>The Data Flow: Lifecycle of a Model</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Understanding this flow is critical for the hands-on lab you are about to perform.</p>
+<p>Understanding the flow for the hands-on lab you are about to perform.</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -247,7 +260,7 @@ data:
 </div>
 </li>
 <li>
-<p><strong>Storage (The Push):</strong></p>
+<p><strong>Storage (The Storage):</strong></p>
 <div class="ulist">
 <ul>
 <li>
@@ -260,7 +273,7 @@ data:
 </div>
 </li>
 <li>
-<p><strong>Registration (The Stamp):</strong></p>
+<p><strong>Registration (The Model Registry):</strong></p>
 <div class="ulist">
 <ul>
 <li>
@@ -276,7 +289,7 @@ data:
 </div>
 </li>
 <li>
-<p><strong>Discovery (The Consumption):</strong></p>
+<p><strong>Visibility (The Model Catalog):</strong></p>
 <div class="ulist">
 <ul>
 <li>
@@ -284,6 +297,22 @@ data:
 </li>
 <li>
 <p>They see the "Granite 7B" card.</p>
+</li>
+<li>
+<p>When they click "Deploy," RHOAI reads the S3 URI from the Registry and pulls the weights directly from your private bucket—<strong>never</strong> touching the public internet.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Discovery (The Consumption):</strong></p>
+<div class="ulist">
+<ul>
+<li>
+<p>A Data Scientist opens the RHOAI Dashboard.</p>
+</li>
+<li>
+<p>They see the "Granite 2B" card.</p>
 </li>
 <li>
 <p>When they click "Deploy," RHOAI reads the S3 URI from the Registry and pulls the weights directly from your private bucket—<strong>never</strong> touching the public internet.</p>
