@@ -6,7 +6,7 @@
 #              1. Creates the Namespace
 #              2. Deploys MinIO (Object Storage)
 #              3. Deploys MySQL (Metadata Storage)
-#              4. Creates S3 Data Connection for RHOAI
+#              4. Creates Connection Secrets for the Registry Operator
 # =================================================================================
 
 set -e # Exit immediately if a command exits with a non-zero status
@@ -60,48 +60,31 @@ else
 fi
 
 # ---------------------------------------------------------------------------------
-# 4. Create Storage Secret (Data Connection)
+# 4. Create Inter-Service Secrets
 # ---------------------------------------------------------------------------------
 echo "----------------------------------------------------------------"
-echo "Step 4: Creating S3 Data Connection..."
+echo "Step 4: Creating Credential Secrets for Model Registry Operator..."
 
-# We create a secret with the specific labels required by OpenShift AI to recognize
-# it as a "Data Connection". This allows users to easily select it in pipelines.
-echo "➤ Creating 'aws-connection-minio' in $NAMESPACE..."
+# Secret 1: Database Connection Secret (Used by Model Registry to talk to MySQL)
+# The Registry Operator expects a secret with specific keys (user, password, database, host)
+echo "➤ Creating 'model-registry-db-secret'..."
+oc create secret generic model-registry-db-secret \
+    --from-literal=database="$MYSQL_DATABASE" \
+    --from-literal=user="$MYSQL_USER" \
+    --from-literal=password="$MYSQL_PASSWORD" \
+    --from-literal=host="mysql.rhoai-model-registry-lab.svc.cluster.local" \
+    --from-literal=port="3306" \
+    -n rhoai-model-registries \
+    --dry-run=client -o yaml | oc apply -f -
 
-oc create secret generic aws-connection-minio \
-    --from-literal=AWS_ACCESS_KEY_ID="$MINIO_ACCESS_KEY" \
-    --from-literal=AWS_SECRET_ACCESS_KEY="$MINIO_SECRET_KEY" \
-    --from-literal=AWS_S3_ENDPOINT="http://minio-service.$NAMESPACE.svc.cluster.local:9000" \
-    --from-literal=AWS_DEFAULT_REGION="us-east-1" \
-    --from-literal=AWS_S3_BUCKET="private-models" \
+
+# Secret 2: Storage Connection Secret (Used by the Code/Pipeline to upload models)
+echo "➤ Creating 'model-registry-s3-secret'..."
+oc create secret generic model-registry-s3-secret \
+    --from-literal=aws_access_key_id="$MINIO_ACCESS_KEY" \
+    --from-literal=aws_secret_access_key="$MINIO_SECRET_KEY" \
+    --from-literal=endpoint_url="http://minio-service.$NAMESPACE.svc.cluster.local:9000" \
+    --from-literal=region="us-east-1" \
+    --from-literal=bucket="private-models" \
     -n "$NAMESPACE" \
-    --dry-run=client -o yaml | \
-    oc apply -f -
-
-# Apply the label to make it visible in the RHOAI Dashboard
-oc label secret aws-connection-minio \
-    "opendatahub.io/dashboard=true" \
-    -n "$NAMESPACE" \
-    --overwrite
-
-echo "✔ Storage Secret Created. It will appear as 'aws-connection-minio' in the Dashboard."
-
-# ---------------------------------------------------------------------------------
-# 5. Summary / Next Steps
-# ---------------------------------------------------------------------------------
-echo "----------------------------------------------------------------"
-echo "✅ Infrastructure Setup Complete!"
-echo ""
-echo "📝 NEXT STEP: MANUAL DB CONNECTION"
-echo "The MySQL Database is running, but the Registry does not have the password yet."
-echo "Please have the lab user execute the following command manually to create the DB secret:"
-echo ""
-echo "oc create secret generic registry-db-secret \\"
-echo "  -n rhoai-model-registries \\"
-echo "  --from-literal=database-host='mysql.$NAMESPACE.svc.cluster.local' \\"
-echo "  --from-literal=database-port='3306' \\"
-echo "  --from-literal=database-name='$MYSQL_DATABASE' \\"
-echo "  --from-literal=database-user='$MYSQL_USER' \\"
-echo "  --from-literal=database-password='$MYSQL_PASSWORD'"
-echo "----------------------------------------------------------------"
+    --dry-run=client -o yaml | oc apply -f -

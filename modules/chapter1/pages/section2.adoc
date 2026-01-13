@@ -44,7 +44,7 @@ Ensure the database and storage are running before proceeding.
 +
 [source,bash]
 ----
-oc get pods -n rhoai-model-registry
+oc get pods -n rhoai-model-registry-lab
 ----
 +
 *Expected Output:*
@@ -52,10 +52,51 @@ oc get pods -n rhoai-model-registry
 NAME                              READY   STATUS    RESTARTS   AGE
 mysql-5d8f7-xyz                   1/1     Running   0          45s
 minio-7b9c2-abc                   1/1     Running   0          45s
-s3-ui-6d8f-rst.                   1/1     Running   0          20s
+s3-ui-6d87f-rst.                  1/1     Running   0          20s
 ----
 
 == Step 2: The Ingestion (Registering the "Gold" Model)
+
+
+# 1. Switch to the namespace
+oc project rhoai-model-registry-lab
+
+# 2. Create the secret
+oc create secret generic my-registry-db-secret \
+  --from-literal=database-host="mysql.rhoai-model-registry-lab.svc.cluster.local" \
+  --from-literal=database-port="3306" \
+  --from-literal=database-user="admin" \
+  --from-literal=database-password="mysql-admin" \
+  --from-literal=database-name="sampledb"
+
+cat <<EOF | oc apply -f -
+apiVersion: modelregistry.opendatahub.io/v1beta1
+kind: ModelRegistry
+metadata:
+  name: my-model-karlos
+  namespace: rhoai-model-registries
+spec:
+  # Connectivity for the REST API
+  grpc:
+    port: 9090
+  rest:
+    port: 8080
+
+  # Database Connection Info
+  # This references the Secret we created in Step 1
+  mysql:
+    host: "mysql.rhoai-model-registry-lab.svc.cluster.local"
+    port: 3306
+    database: "sampledb"
+    username: "admin"
+    passwordSecret:
+      name: "my-registry-db-secret"
+      key: "mysql-admin"
+      
+  # (Optional) If using Postgres instead of MySQL, use the 'postgres' block instead.
+EOF 
+
+
 
 Now that the database is running, it is empty. We need to setup the model registry in RHOAI UI.
 
