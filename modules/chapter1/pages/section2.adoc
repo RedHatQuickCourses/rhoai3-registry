@@ -55,50 +55,44 @@ minio-7b9c2-abc                   1/1     Running   0          45s
 s3-ui-6d87f-rst.                  1/1     Running   0          20s
 ----
 
-== Step 2: The Ingestion (Registering the "Gold" Model)
+== Step 2: Link the Model Registry to the Database)
 
-
-# 1. Switch to the namespace
-oc project rhoai-model-registry-lab
-
-# 2. Create the secret
-oc create secret generic my-registry-db-secret \
-  --from-literal=database-host="mysql.rhoai-model-registry-lab.svc.cluster.local" \
-  --from-literal=database-port="3306" \
-  --from-literal=database-user="admin" \
-  --from-literal=database-password="mysql-admin" \
-  --from-literal=database-name="sampledb"
-
+[source,bash]
+----
 cat <<EOF | oc apply -f -
 apiVersion: modelregistry.opendatahub.io/v1beta1
 kind: ModelRegistry
 metadata:
-  name: my-model-karlos
-  namespace: rhoai-model-registries
+  name: model-registry-lab9
+  namespace: rhoai-model-registries   
 spec:
-  # Connectivity for the REST API
   grpc:
     port: 9090
   rest:
     port: 8080
-
-  # Database Connection Info
-  # This references the Secret we created in Step 1
   mysql:
+    # NETWORK BRIDGE: We use the full DNS name to reach the lab namespace
     host: "mysql.rhoai-model-registry-lab.svc.cluster.local"
     port: 3306
     database: "sampledb"
     username: "admin"
     passwordSecret:
-      name: "my-registry-db-secret"
-      key: "mysql-admin"
+      name: "registry-db-secret"
+      key: "database-password"
+    sslMode: "disable"
       
   # (Optional) If using Postgres instead of MySQL, use the 'postgres' block instead.
 EOF 
+----
 
+You can check the OpenShift AI UI or run this command to verify that model registry is working as designed. 
 
+# 
 
-Now that the database is running, it is empty. We need to setup the model registry in RHOAI UI.
+oc get modelregistries.modelregistry.opendatahub.io -n rhoai-model-registries  
+
+== Next Step
+Now that the Model Registry is running, it is empty. We need to setup the model registry in RHOAI UI.
 
 You will run a Python automation pipeline that mimics a secure supply chain:
 
