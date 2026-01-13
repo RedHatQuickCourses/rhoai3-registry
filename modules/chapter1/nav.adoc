@@ -1,4 +1,5 @@
 * xref:index.adoc[Introduction & Value]
 * xref:section1.adoc[Architecture Deep Dive]
 * xref:section2.adoc[The QuickStart Lab]
+* xref:section4.adoc[The Model Catalog]
 * xref:section3.adoc[Troubleshooting]

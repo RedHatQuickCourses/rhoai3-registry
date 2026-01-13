@@ -1,0 +1,92 @@
+= Troubleshooting & Day 2 Operations
+:navtitle: Troubleshooting
+:toc: macro
+
+// Antora metadata
+:page-role: troubleshooting-guide
+:description: How to debug common Model Registry issues and maintain the system.
+
+[.lead]
+*A "Black Box" is a liability. You need to know how to look under the hood.*
+
+Even in a perfect "AI Factory," components will occasionally fail. A database password might rotate, an S3 bucket might become unreachable, or a model artifact might be corrupt.
+
+This section equips you with the **SRE (Site Reliability Engineering) Playbook** for the Model Registry.
+
+== 1. Debugging the "Brain" (Registry Service)
+
+If the Registry API is not responding, or if your Python scripts fail with `500 Internal Server Error`, start here.
+
+**Check 1: Is the Pod Running?**
+[source,bash]
+----
+oc get pods -n rhoai-model-registry -l app=model-registry-service
+----
+* *Status `CrashLoopBackOff`:* Usually means the database connection failed.
+* *Status `ImagePullBackOff`:* Check your cluster's internet connectivity or image registry credentials.
+
+**Check 2: The Logs (The Source of Truth)**
+[source,bash]
+----
+oc logs -n rhoai-model-registry deployment/model-registry-service
+----
+* **Look for:** `Access denied for user`, `Connection refused`, or `Unknown database`.
+* **Fix:** Verify the `model-registry-db-secret` matches the actual MySQL credentials.
+
+== 2. Debugging the "Vault" (Storage Access)
+
+If your Python script fails during the **Upload** phase, or if the RHOAI Dashboard shows a "Model Load Error" when deploying.
+
+**Check 1: Can the Registry see S3?**
+The Registry Service needs to verify the S3 URI exists. If the networking is blocked, it will fail.
+[source,bash]
+----
+# Exec into the registry pod to test connectivity
+oc rsh -n rhoai-model-registry deployment/model-registry-service curl -v http://minio-service.rhoai-model-registry.svc.cluster.local:9000/minio/health/live
+----
+* *Expected:* `HTTP/1.1 200 OK`
+
+**Check 2: Are the keys correct?**
+A common mistake is a typo in the `aws_access_key_id` inside the secret.
+[source,bash]
+----
+oc get secret model-registry-s3-secret -n rhoai-model-registry -o jsonpath='{.data.aws_access_key_id}' | base64 -d
+----
+
+== 3. Debugging the "Showroom" (Model Catalog)
+
+If you registered the model successfully (Python script said `SUCCESS`), but the card **does not appear** in the OpenShift AI Dashboard.
+
+**Check 1: Is the CatalogSource Valid?**
+The Dashboard logs will complain if the YAML was malformed.
+[source,bash]
+----
+oc logs -n redhat-ods-applications -l app=dashboard
+----
+* **Grep for:** `ModelCatalog`, `Error parsing`, or `unreachable`.
+
+**Check 2: Caching Issues**
+The Dashboard caches catalog data aggressively.
+* **Fix:** Delete the Dashboard pod to force a refresh.
+[source,bash]
+----
+oc delete pod -n redhat-ods-applications -l app=dashboard
+----
+
+== 4. Emergency Reset (The "Nuke It" Option)
+
+If your environment is hopelessly tangled and you need to restart the lab from scratch:
+
+[source,bash]
+----
+# 1. Delete the Project (This kills everything: DB, MinIO, Registry)
+oc delete project rhoai-model-registry
+
+# 2. Re-run the Setup Script
+./deploy/setup.sh
+----
+
+---
+*You now have the full lifecycle: Build, Operate, and Fix. You are ready to run the AI Factory.*
+
+xref:index.adoc[Return to Start]
