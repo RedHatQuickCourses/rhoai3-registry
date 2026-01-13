@@ -160,7 +160,7 @@
 Ensure the database and storage are running before proceeding.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -n rhoai-model-registry</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -n rhoai-model-registry-lab</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -174,7 +174,7 @@ Ensure the database and storage are running before proceeding.</p>
 <pre>NAME                              READY   STATUS    RESTARTS   AGE
 mysql-5d8f7-xyz                   1/1     Running   0          45s
 minio-7b9c2-abc                   1/1     Running   0          45s
-s3-ui-6d8f-rst.                   1/1     Running   0          20s</pre>
+s3-ui-6d87f-rst.                  1/1     Running   0          20s</pre>
 </div>
 </div>
 </div>
@@ -182,6 +182,56 @@ s3-ui-6d8f-rst.                   1/1     Running   0          20s</pre>
 <div class="sect1">
 <h2 id="_step_2_the_ingestion_registering_the_gold_model"><a class="anchor" href="#_step_2_the_ingestion_registering_the_gold_model"></a>Step 2: The Ingestion (Registering the "Gold" Model)</h2>
 <div class="sectionbody">
+
+</div>
+</div>
+<h1 id="_1_switch_to_the_namespace" class="sect0"><a class="anchor" href="#_1_switch_to_the_namespace"></a>1. Switch to the namespace</h1>
+<div class="paragraph">
+<p>oc project rhoai-model-registry-lab</p>
+</div>
+<h1 id="_2_create_the_secret" class="sect0"><a class="anchor" href="#_2_create_the_secret"></a>2. Create the secret</h1>
+<div class="paragraph">
+<p>oc create secret generic my-registry-db-secret \
+  --from-literal=database-host="mysql.rhoai-model-registry-lab.svc.cluster.local" \
+  --from-literal=database-port="3306" \
+  --from-literal=database-user="admin" \
+  --from-literal=database-password="mysql-admin" \
+  --from-literal=database-name="sampledb"</p>
+</div>
+<div class="paragraph">
+<p>cat &lt;&lt;EOF | oc apply -f -
+apiVersion: modelregistry.opendatahub.io/v1beta1
+kind: ModelRegistry
+metadata:
+  name: my-model-karlos
+  namespace: rhoai-model-registries
+spec:
+  # Connectivity for the REST API
+  grpc:
+    port: 9090
+  rest:
+    port: 8080</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># Database Connection Info
+# This references the Secret we created in Step 1
+mysql:
+  host: "mysql.rhoai-model-registry-lab.svc.cluster.local"
+  port: 3306
+  database: "sampledb"
+  username: "admin"
+  passwordSecret:
+    name: "my-registry-db-secret"
+    key: "mysql-admin"</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>  # (Optional) If using Postgres instead of MySQL, use the 'postgres' block instead.
+EOF</pre>
+</div>
+</div>
 <div class="paragraph">
 <p>Now that the database is running, it is empty. We need to setup the model registry in RHOAI UI.</p>
 </div>
@@ -234,8 +284,6 @@ Watch the logs. You should see the "Handshake" happen:</p>
 </div>
 </li>
 </ol>
-</div>
-</div>
 </div>
 <div class="sect1">
 <h2 id="_step_3_the_payoff_connecting_the_catalog"><a class="anchor" href="#_step_3_the_payoff_connecting_the_catalog"></a>Step 3: The Payoff (Connecting the Catalog)</h2>
