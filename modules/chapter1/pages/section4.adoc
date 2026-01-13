@@ -1,92 +1,151 @@
-= Troubleshooting & Day 2 Operations
-:navtitle: Troubleshooting
+= Lab: Adding Custom Models to the OpenShift AI Model Catalog
 :toc: macro
+:source-highlighter: rouge
 
-// Antora metadata
-:page-role: troubleshooting-guide
-:description: How to debug common Model Registry issues and maintain the system.
+This lab guides you through manually registering external models (e.g., from Hugging Face) into the OpenShift AI Model Catalog using the file-based configuration method.
 
-[.lead]
-*A "Black Box" is a liability. You need to know how to look under the hood.*
+== Prerequisites
 
-Even in a perfect "AI Factory," components will occasionally fail. A database password might rotate, an S3 bucket might become unreachable, or a model artifact might be corrupt.
+* Access to the OpenShift Cluster via a terminal (`oc` CLI).
+* `cluster-admin` privileges (or permissions to edit ConfigMaps in the model registry namespace).
 
-This section equips you with the **SRE (Site Reliability Engineering) Playbook** for the Model Registry.
+== Procedure
 
-== 1. Debugging the "Brain" (Registry Service)
+=== 1. Switch to the Registry Namespace
 
-If the Registry API is not responding, or if your Python scripts fail with `500 Internal Server Error`, start here.
-
-**Check 1: Is the Pod Running?**
-[source,bash]
-----
-oc get pods -n rhoai-model-registry -l app=model-registry-service
-----
-* *Status `CrashLoopBackOff`:* Usually means the database connection failed.
-* *Status `ImagePullBackOff`:* Check your cluster's internet connectivity or image registry credentials.
-
-**Check 2: The Logs (The Source of Truth)**
-[source,bash]
-----
-oc logs -n rhoai-model-registry deployment/model-registry-service
-----
-* **Look for:** `Access denied for user`, `Connection refused`, or `Unknown database`.
-* **Fix:** Verify the `model-registry-db-secret` matches the actual MySQL credentials.
-
-== 2. Debugging the "Vault" (Storage Access)
-
-If your Python script fails during the **Upload** phase, or if the RHOAI Dashboard shows a "Model Load Error" when deploying.
-
-**Check 1: Can the Registry see S3?**
-The Registry Service needs to verify the S3 URI exists. If the networking is blocked, it will fail.
-[source,bash]
-----
-# Exec into the registry pod to test connectivity
-oc rsh -n rhoai-model-registry deployment/model-registry-service curl -v http://minio-service.rhoai-model-registry.svc.cluster.local:9000/minio/health/live
-----
-* *Expected:* `HTTP/1.1 200 OK`
-
-**Check 2: Are the keys correct?**
-A common mistake is a typo in the `aws_access_key_id` inside the secret.
-[source,bash]
-----
-oc get secret model-registry-s3-secret -n rhoai-model-registry -o jsonpath='{.data.aws_access_key_id}' | base64 -d
-----
-
-== 3. Debugging the "Showroom" (Model Catalog)
-
-If you registered the model successfully (Python script said `SUCCESS`), but the card **does not appear** in the OpenShift AI Dashboard.
-
-**Check 1: Is the CatalogSource Valid?**
-The Dashboard logs will complain if the YAML was malformed.
-[source,bash]
-----
-oc logs -n redhat-ods-applications -l app=dashboard
-----
-* **Grep for:** `ModelCatalog`, `Error parsing`, or `unreachable`.
-
-**Check 2: Caching Issues**
-The Dashboard caches catalog data aggressively.
-* **Fix:** Delete the Dashboard pod to force a refresh.
-[source,bash]
-----
-oc delete pod -n redhat-ods-applications -l app=dashboard
-----
-
-== 4. Emergency Reset (The "Nuke It" Option)
-
-If your environment is hopelessly tangled and you need to restart the lab from scratch:
+First, ensure you are working in the correct namespace where the Model Registry components are running.
 
 [source,bash]
 ----
-# 1. Delete the Project (This kills everything: DB, MinIO, Registry)
-oc delete project rhoai-model-registry
-
-# 2. Re-run the Setup Script
-./deploy/setup.sh
+oc project rhoai-model-registries
 ----
 
----
-*You now have the full lifecycle: Build, Operate, and Fix. You are ready to run the AI Factory.*
+=== 2. Open the Catalog Configuration
 
-xref:index.adoc[Return to Start]
+The Model Catalog does not use a database for configuration; it uses a Kubernetes **ConfigMap**. You will edit this object directly.
+
+[source,bash]
+----
+oc edit configmap model-catalog-sources
+----
+
+[NOTE]
+====
+You are editing a **ConfigMap**, not a local file. The file `sources.yaml` exists virtually inside the `data` section of this object.
+====
+
+=== 3. configure the Registry and Add Models
+
+You need to define two logical "files" inside this ConfigMap:
+1.  **`sources.yaml`**: Registers your custom catalog path.
+2.  **`my-models.yaml`**: Contains the actual metadata for your models.
+
+Copy and paste the following block into the `data:` section of the ConfigMap.
+
+.Understanding the Schema
+* **Top-Level Fields:** Only `name`, `description`, `readme`, and `maturity` are allowed here.
+* **customProperties:** You **must** put `author`, `version`, `model_type`, and other metadata here to avoid errors.
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: model-catalog-sources
+  namespace: rhoai-model-registries
+data:
+  # FILE 1: The Main Config - Points to your custom file
+  sources.yaml: |
+    catalogs:
+      - name: "Training Lab Models"
+        id: "lab-custom-models"
+        type: "yaml"
+        properties:
+          yamlCatalogPath: "/data/user-sources/my-models.yaml"
+
+  # FILE 2: Your Model Definitions (Add models here)
+  my-models.yaml: |
+    models:
+      # --- MODEL 1: Microsoft Phi-2 ---
+      - name: "phi-2"
+        description: "Microsoft Phi-2 Small Language Model"
+        customProperties:
+          model_type:
+            metadataType: MetadataStringValue
+            string_value: "generative"
+          author:
+            metadataType: MetadataStringValue
+            string_value: "Microsoft"
+          version:
+            metadataType: MetadataStringValue
+            string_value: "2.0"
+        artifacts:
+          - name: "model-artifact"
+            uri: "hf://microsoft/phi-2"
+
+      # --- MODEL 2: IBM Granite (Added for clarity) ---
+      - name: "granite-7b-lab"
+        description: "IBM Granite 7B Base Model"
+        customProperties:
+          model_type:
+            metadataType: MetadataStringValue
+            string_value: "generative"
+          author:
+            metadataType: MetadataStringValue
+            string_value: "IBM"
+          license:
+            metadataType: MetadataStringValue
+            string_value: "Apache-2.0"
+        artifacts:
+          - name: "granite-artifact"
+            uri: "hf://ibm-granite/granite-7b-base"
+----
+
+=== 4. Save and Exit
+
+* **Vi/Vim Users:** Press `Esc`, then type `:wq` and hit `Enter`.
+* **Nano Users:** Press `Ctrl+O`, `Enter`, then `Ctrl+X`.
+
+If the edit is successful, you will see:
+`configmap/model-catalog-sources edited`
+
+=== 5. Apply Changes (Force Reload)
+
+The catalog service attempts to "hot reload" changes, but it is best practice in a lab environment to restart the pod to ensure a clean state and immediate update.
+
+[source,bash]
+----
+oc delete pod -l component=model-catalog -n rhoai-model-registries
+----
+
+Wait for the new pod to start (Status: `Running`):
+
+[source,bash]
+----
+oc get pods -l component=model-catalog -w
+----
+
+== Verification
+
+Before checking the Dashboard, verify the API is serving your new models.
+
+[source,bash]
+----
+# 1. Open a port-forward tunnel (run this in the background or a separate tab)
+oc port-forward svc/model-catalog 8080:8080 &
+
+# 2. Query your specific source ID
+curl -s "http://localhost:8080/api/model_catalog/v1alpha1/models?source=lab-custom-models"
+----
+
+**Expected Output:**
+You should see a JSON response containing both `"name": "phi-2"` and `"name": "granite-7b-lab"`.
+
+== Troubleshooting
+
+* **Error:** `json: unknown field "author"`
+    * **Fix:** You placed `author` at the top level of the YAML. Move it inside `customProperties`.
+* **Error:** `sources.yaml: no such file or directory`
+    * **Fix:** You likely accidentally deleted the `sources.yaml` key in the ConfigMap. Re-copy the full YAML block from Step 3.
+* **Dashboard Issue:** Models not visible in the UI.
+    * **Fix:** In the OpenShift AI Model Catalog, check the **Source** filter. Uncheck "Red Hat AI" and ensure "Training Lab Models" (or "All sources") is selected.
