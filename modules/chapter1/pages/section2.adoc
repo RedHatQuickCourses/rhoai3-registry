@@ -120,4 +120,4 @@ image::private-catalog-card.png[align="center", title="Your Private Model, Ready
 ---
 *Congratulations! You have successfully built a private AI Supply Chain. You are no longer dependent on public hubs.*
 
-xref:section3.adoc[Next: Troubleshooting & Day 2 Operations >]
+xref:section2.adoc[The QuickStart Lab]

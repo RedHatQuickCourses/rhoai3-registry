@@ -149,3 +149,4 @@ You should see a JSON response containing both `"name": "phi-2"` and `"name": "g
     * **Fix:** You likely accidentally deleted the `sources.yaml` key in the ConfigMap. Re-copy the full YAML block from Step 3.
 * **Dashboard Issue:** Models not visible in the UI.
     * **Fix:** In the OpenShift AI Model Catalog, check the **Source** filter. Uncheck "Red Hat AI" and ensure "Training Lab Models" (or "All sources") is selected.
+
