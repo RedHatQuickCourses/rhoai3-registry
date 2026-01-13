@@ -9,14 +9,14 @@
 [.lead]
 *A "Registry" is not a "Repository." Understanding the difference is key to a scalable AI Platform.*
 
-To build a private AI factory, you must distinguish between **where the data lives** and **how the data is governed**. In Red Hat OpenShift AI (RHOAI), we decouple these two concerns to ensure performance, security, and flexibility.
+To build a private AI Factory, you must distinguish between **where the data lives** and **how the data is governed**. In Red Hat OpenShift AI (RHOAI), we decouple these two concerns to ensure performance, security, and flexibility.
 
 == The Core Concept: Decoupling Control vs. Data
 
-The RHOAI Model Registry architecture follows a "Split-Plane" design.
+The RHOAI Model Registry architecture follows a "split-plane" design.
 
- * **The Control Plane (The "Librarian"):** The Model Registry itself. It is a lightweight metadata service backed by a relational database (MySQL). It knows *about* the models (Author, Version, License, Metrics) but does not hold the files.
- * **The Data Plane (The "Bookshelf"):** Your Object Storage (S3/MinIO/Ceph). This is where the heavy artifacts (Safetensors, ONNX files, configs) actually reside.
+ * **The Control Plane (The "Librarian"):** The *Model Registry* itself. It is a lightweight metadata service backed by a relational database (MySQL). It knows *about* the models (Author, Version, License, Metrics) but does not hold the files.
+ * **The Data Plane (The "Bookshelf"):** Your object storage (S3/MinIO/Quay/Ceph). This is where the heavy artifacts (Safetensors, ONNX files, configs) actually reside.
 
 
 == Component Breakdown
@@ -38,14 +38,16 @@ This is the vault. It must be an S3-compatible object storage service.
  * **The "Golden Image" Concept:** Once a model version is uploaded here and registered, the file should be treated as **immutable**.
 
 === 3. The Model Catalog (The "Showroom")
-The Catalog is where Data Scientists browse available models. By default, it shows public models (Granite, Llama). To show *your* private models, we must explicitly connect the two.
+The Catalog is where AI Developers and Data Scientists browse available models. By default, it shows Red Hat Validated (ready for inference) and Red Hat AI models (ready for tuning pipeline). You'll find model like (Granite, DeepSeekR1 and Llama). To show *your* private models, we must explicitly connect the two.
 
  * **The Mechanism:** The RHOAI Dashboard reads from **Catalog Sources**.
- * **The Integration:** We will deploy a specific **`ModelCatalogSource`** (YAML) that connects to our Registry.
+ * **The Integration:** The Model Catalog does not use a database for configuration; it uses a Kubernetes **ConfigMap**. You will edit this object directly to add your model details.
+
  * **The Workflow:**
-    1. A model is registered in the **Model Registry** (Status: `Registered`).
-    2. We apply a `CatalogSource` configuration that references our Registry's API.
-    3. The Dashboard then renders a card for your private model, allowing users to deploy it just like a public Red Hat model.
+You need to define two logical "files" inside this ConfigMap:
+ 
+ 1.  **`sources.yaml`**: Registers your custom catalog path.
+ 2.  **`my-models.yaml`**: Contains the actual metadata for your models.
 
 [%collapsible]
 ====
@@ -54,45 +56,65 @@ The Catalog is where Data Scientists browse available models. By default, it sho
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: private-registry-config
-  namespace: redhat-ods-applications # The namespace where RHOAI Dashboard runs
-  labels:
-    opendatahub.io/dashboard: "true" # Required for the Dashboard to detect this config
+  name: model-catalog-sources
+  namespace: rhoai-model-registries
 data:
-  # This section configures the connection between the UI and your Registry Service
-  service-config.yaml: |
-    displayName: "Private Enterprise Registry"
-    description: "Verified models for internal production use (Gold/Silver/Bronze)"
-    provider: "MyCompany AI Platform"
-    serviceURL: "http://model-registry-service.rhoai-model-registry.svc.cluster.local:8080"
-    bearerTokenSecret: "model-registry-db-secret" # References the secret created in Step 1
-    supportedFormats:
-      - name: "safetensors"
-      - name: "onnx"
-      - name: "gguf"
+  # FILE 1: The Main Config - Points to your custom file
+  sources.yaml: |
+    catalogs:
+      - name: "Model-Registry-Models"
+        id: "registry-custom-models"
+        type: "yaml"
+        properties:
+          yamlCatalogPath: "/data/user-sources/registry-models.yaml"
+
+  # FILE 2: Your Model Definitions (Add models here)
+  registry-models.yaml: |
+    models:
+      # --- MODEL 1: IBM Granite ---
+      - name: "granite-3.0-2b-instruct"
+        description: "IBM Granite Small Language Model"
+        customProperties:
+          model_type:
+            metadataType: MetadataStringValue
+            string_value: "generative"
+          author:
+            metadataType: MetadataStringValue
+            string_value: "IBM"
+          version:
+            metadataType: MetadataStringValue
+            string_value: "1.0"
+        artifacts:
+          - name: "model-artifact"
+            uri: "oci://quay.io/redhat-ai-services/modelcar-catalog:granite-3.0-2b-instruct"
 ----
 ====
 
 == The Data Flow: Lifecycle of a Model
 
-Understanding this flow is critical for the hands-on lab you are about to perform.
+Understanding the flow for the hands-on lab you are about to perform.
 
 1.  **Ingestion (The Download):**
     * A Python script authenticates with Hugging Face (or another source).
     * It downloads the raw files to a temporary workspace.
 
-2.  **Storage (The Push):**
+2.  **Storage (The Storage):**
     * The script uploads the files to your private S3 bucket (e.g., `s3://my-private-models/granite-7b/v1/`).
     * *Result:* The data is now safe and sovereign.
 
-3.  **Registration (The Stamp):**
+3.  **Registration (The Model Registry):**
     * The script calls the Model Registry API.
     * It sends a JSON payload: "I have a model named 'Granite', Version '1.0', located at 's3://...'"
     * *Result:* The Registry generates a unique ID and stamps the entry.
 
-4.  **Discovery (The Consumption):**
+4.  **Visibility (The Model Catalog):**
     * A Data Scientist opens the RHOAI Dashboard.
     * They see the "Granite 7B" card.
+    * When they click "Deploy," RHOAI reads the S3 URI from the Registry and pulls the weights directly from your private bucket—**never** touching the public internet.
+
+5.  **Discovery (The Consumption):**
+    * A Data Scientist opens the RHOAI Dashboard.
+    * They see the "Granite 2B" card.
     * When they click "Deploy," RHOAI reads the S3 URI from the Registry and pulls the weights directly from your private bucket—**never** touching the public internet.
 
 == System Requirements for the Lab

@@ -57,35 +57,18 @@ data:
   # FILE 1: The Main Config - Points to your custom file
   sources.yaml: |
     catalogs:
-      - name: "Training Lab Models"
-        id: "lab-custom-models"
+      - name: "Model-Registry-Models"
+        id: "registry-custom-models"
         type: "yaml"
         properties:
-          yamlCatalogPath: "/data/user-sources/my-models.yaml"
+          yamlCatalogPath: "/data/user-sources/registry-models.yaml"
 
   # FILE 2: Your Model Definitions (Add models here)
-  my-models.yaml: |
+  registry-models.yaml: |
     models:
-      # --- MODEL 1: Microsoft Phi-2 ---
-      - name: "phi-2"
-        description: "Microsoft Phi-2 Small Language Model"
-        customProperties:
-          model_type:
-            metadataType: MetadataStringValue
-            string_value: "generative"
-          author:
-            metadataType: MetadataStringValue
-            string_value: "Microsoft"
-          version:
-            metadataType: MetadataStringValue
-            string_value: "2.0"
-        artifacts:
-          - name: "model-artifact"
-            uri: "hf://microsoft/phi-2"
-
-      # --- MODEL 2: IBM Granite (Added for clarity) ---
-      - name: "granite-7b-lab"
-        description: "IBM Granite 7B Base Model"
+      # --- MODEL 1: IBM Granite ---
+      - name: "granite-3.0-2b-instruct"
+        description: "IBM Granite Small Language Model"
         customProperties:
           model_type:
             metadataType: MetadataStringValue
@@ -93,12 +76,13 @@ data:
           author:
             metadataType: MetadataStringValue
             string_value: "IBM"
-          license:
+          version:
             metadataType: MetadataStringValue
-            string_value: "Apache-2.0"
+            string_value: "1.0"
         artifacts:
-          - name: "granite-artifact"
-            uri: "hf://ibm-granite/granite-7b-base"
+          - name: "model-artifact"
+            uri: "oci://quay.io/redhat-ai-services/modelcar-catalog:granite-3.0-2b-instruct"
+
 ----
 
 === 4. Save and Exit

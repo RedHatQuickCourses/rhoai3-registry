@@ -1,10 +1,10 @@
 = Lab: Deploying Your AI Supply Chain
-:navtitle: The QuickStart Lab
+:navtitle: The Model Registry Lab
 :toc: macro
 
 // Antora metadata
 :page-role: hands-on-lab
-:description: Step-by-step guide to deploying the Registry, ingesting a model, and connecting the Catalog.
+:description: Step-by-step guide to deploying the registry, ingesting a model, and connecting the catalog.
 
 [.lead]
 *Theory is over. It is time to build.*
@@ -17,15 +17,19 @@ In this lab, you will take on the role of a **Lead Platform Engineer**. Your Dat
 * **Cluster Access:** You are logged into an OpenShift AI 3.0 cluster via terminal (`oc login`).
 * **Permissions:** You have `cluster-admin` or sufficient namespace privileges.
 * **Repository:** You have cloned the course repository:
-  `git clone https://github.com/RedHatQuickCourses/rhoai3-registry.git`
-  `cd rhoai3-registry/`
++
+[source,bash]
+----
+  git clone https://github.com/RedHatQuickCourses/rhoai3-registry.git
+  cd rhoai3-registry/
+----
 ====
 
 == Step 1: The Plumbing (Infrastructure)
 
 The Model Registry is stateless. Before we can turn it on, we need two things: a **Brain** (Database) and a **Vault** (Object Storage).
 
-We have provided a script that deploys a MySQL 8.0 instance and a MinIO object store into a new namespace called `rhoai-model-registry`.
+We have provided a script that deploys a MySQL 8.0 instance and a MinIO object store into a new namespace called `rhoai-model-registry-lab`.
 
 . **Run the Setup Script:**
 +

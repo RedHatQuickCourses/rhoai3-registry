@@ -11,7 +11,7 @@
 
 In the world of software development, no enterprise would allow developers to email zip files of source code to one another. We use Git. We use version control. We use pipelines.
 
-Yet, in the world of Artificial Intelligence, this "Wild West" approach is exactly what is happening today. Data Scientists download gigabytes of open-source models (LLMs) to personal laptops, store weights in random S3 buckets, and deploy "magic black boxes" with no history, no lineage, and no security audit.
+Yet, in the world of artificial intelligence, this "wild west" approach is exactly what is happening today. Data scientists download gigabytes of open-source models (LLMs) to personal laptops, store weights in random S3 buckets, and deploy "magic black boxes" with no history, no lineage, and no security audit.
 
 This is **Shadow AI**. And it is the primary blocker to enterprise adoption.
 
@@ -20,11 +20,11 @@ This is **Shadow AI**. And it is the primary blocker to enterprise adoption.
 ====
 *"Why should we build a private Model Registry when we can just use Hugging Face or public APIs?"*
 
-**The Answer:** Because you cannot govern what you do not own. Public hubs are for **discovery**; your Private Registry is for **control, sovereignty, and compliance.**
+**The Answer:** Because you cannot govern what you do not own. Public hubs are for **discovery**; your private registry is for **control, sovereignty, and compliance.**
 ====
 
 == The Solution: The Model Registry
-The **Red Hat OpenShift AI (RHOAI) Model Registry** is the "Title Office" for your organization's intellectual property. It transforms a scattered collection of model files into a governed **AI Supply Chain**.
+The **Red Hat OpenShift AI (RHOAI) Model Registry** is the "title office" for your organization's intellectual property. It transforms a scattered collection of model files into a governed **AI Supply Chain**.
 
 It serves as the bridge between the chaotic world of experimentation and the rigid world of production operations.
 
@@ -37,20 +37,20 @@ By implementing the Model Registry, you unlock three critical capabilities that 
 === 1. Sovereignty & Security ("The Vault")
 When you rely on public APIs, your data leaves your perimeter. When you rely on public model hubs, you are dependent on their uptime and their policy changes.
 
- * **The Win:** The Model Registry keeps the model weights and metadata strictly within your Hybrid Cloud environment.
- * **The Benefit:** You have a disconnected, air-gapped ready "Vault" that ensures your proprietary fine-tuned models never leak.
+ * **The Win:** The Model Registry keeps the model metadata strictly within your hybrid cloud environment.
+ * **The Benefit:** You have a disconnected, air-gapped ready "vault" that ensures your proprietary fine-tuned models never leak.
 
 === 2. Efficiency & Reuse ("The Single Source of Truth")
-Without a registry, five different teams might download `Llama-3-7b` five different times, uploading copies to five different S3 buckets. This creates "Model Drift," where no one knows if they are using the exact same weights.
+Without a registry, five different teams might download `Llama-3-7b` five different times, uploading copies to five different S3 buckets. This creates "model drift," where no one knows if they are using the exact same weights.
 
- * **The Win:** The Registry enforces a **"Golden Reference."**
- * **The Mechanism:** The Registry does not store the massive model files itself. Instead, it acts as the **authoritative pointer**. It holds the immutable URI (e.g., `s3://prod-models/granite-7b-v1/`) and the cryptographic hash of the model.
- * **The Benefit:** When a Platform Engineer deploys to the Edge or Cloud, they query the Registry for the "Production" tag. The Registry directs them to the single, approved object in your secure storage. You build the configuration once, and the Registry ensures every deployment uses the exact same asset.
+ * **The Win:** The registry enforces a **"Golden Reference."**
+ * **The Mechanism:** The registry does not store the massive model files itself. Instead, it acts as the **authoritative pointer**. It holds the immutable URI (e.g., `s3://prod-models/granite-7b-v1/`) and the cryptographic hash of the model.
+ * **The Benefit:** When a platform engineer deploys to private infrastructure, the edge or cloud, they query the registry for the "production" tag. The registry directs them to the single, approved object in your secure storage. You build the configuration once, and the registry ensures every deployment uses the exact same asset.
 
 === 3. Governance & Lineage ("The Audit Trail")
 In regulated industries (Finance, Healthcare, Public Sector), you must answer the question: *"Who deployed this AI, and what data was it trained on?"*
 
- * **The Win:** Every model version is stamped with metadata: Author, License, Source URI, and Performance Metrics.
+ * **The Win:** Every model version is stamped with metadata: author, license, source URI, and performance metrics.
  * **The Benefit:** You achieve compliance by default. You can trace a hallucinating model in production back to the exact training set and developer who registered it.
 
 == Your Mission: Build the Factory
@@ -60,8 +60,8 @@ In this course, you will not just read about the registry; you will **build one*
 **You will execute the following Technical Workflow:**
 
  1.  **The Infrastructure:** Deploy the backing services (MySQL & Object Storage) required to power the registry.
- 2.  **The Ingestion:** Use Python code to fetch a model from Hugging Face and formally "Register" it with versioned metadata.
- 3.  **The Payoff:** Connect your Private Registry to the **Model Catalog**, making your secure model available for one-click deployment by business users.
+ 2.  **The Ingestion:** Use Python code to fetch a model from Hugging Face and formally "register" it with versioned metadata.
+ 3.  **The Payoff:** Connect your private registry to the **Model Catalog**, making your secure model available for one-click deployment by business users.
 
 [IMPORTANT]
 .Prerequisites
@@ -69,7 +69,7 @@ In this course, you will not just read about the registry; you will **build one*
 To successfully complete the hands-on sections of this course, you need:
 
  * Access to a **Red Hat OpenShift AI 3.0** cluster.
- * `cluster-admin` privileges (to install the Registry Operator and Dependencies).
+ * `cluster-admin` privileges (to install the registry database and dependencies).
  * The `oc` CLI tool installed in your terminal.
 ====
 

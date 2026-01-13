@@ -12,7 +12,7 @@
 set -e # Exit immediately if a command exits with a non-zero status
 
 # Configuration Variables
-NAMESPACE="rhoai-model-registry"
+NAMESPACE="rhoai-model-registry-lab"
 MYSQL_USER="admin"
 MYSQL_PASSWORD="mysql-admin"
 MYSQL_DATABASE="sampledb"
@@ -87,19 +87,3 @@ oc create secret generic model-registry-s3-secret \
     --from-literal=bucket="private-models" \
     -n "$NAMESPACE" \
     --dry-run=client -o yaml | oc apply -f -
-
-# ---------------------------------------------------------------------------------
-# 5. Verification
-# ---------------------------------------------------------------------------------
-echo "----------------------------------------------------------------"
-echo "Step 5: Waiting for Infrastructure Rollout..."
-echo "➤ Waiting for MySQL and MinIO to be ready (timeout: 120s)..."
-
-oc wait --for=condition=ready pod -l app=mysql -n "$NAMESPACE" --timeout=120s
-oc wait --for=condition=ready pod -l app=minio -n "$NAMESPACE" --timeout=120s
-
-echo ""
-echo "✅ SUCCESS: Infrastructure is live."
-echo "   - MySQL Service: mysql.$NAMESPACE.svc.cluster.local"
-echo "   - MinIO Console: https://$(oc get route minio-ui -n $NAMESPACE -o jsonpath='{.spec.host}')"
-echo "   - Ready for Step 2: Model Ingestion."
