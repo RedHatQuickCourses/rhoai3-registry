@@ -171,7 +171,7 @@
 </ol>
 </div>
 <div class="paragraph">
-<p>Copy and paste the following block into the <code>data:</code> section of the ConfigMap.</p>
+<p>Copy and paste the following data segment of the block into the <code>data:</code> section of the ConfigMap.</p>
 </div>
 <div class="ulist">
 <div class="title">Understanding the Schema</div>
@@ -186,11 +186,11 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: model-catalog-sources
-  namespace: rhoai-model-registries
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: model-catalog-sources
+#   namespace: rhoai-model-registries
 data:
   # FILE 1: The Main Config - Points to your custom file
   sources.yaml: |
