@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Lab: Deploying Your AI Supply Chain :: Red Hat OpenShift AI (RHOAI) Model Registry</title>
     <link rel="prev" href="section1.html">
-    <link rel="next" href="section4.html">
+    <link rel="next" href="section3.html">
     <meta name="generator" content="Antora 3.1.3">
     <link rel="stylesheet" href="../../../_/css/site.css">
     <script>var uiRootPath = '../../../_'</script>
@@ -49,10 +49,10 @@
     <a class="nav-link" href="section2.html">The QuickStart Lab</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="section4.html">The Model Catalog</a>
+    <a class="nav-link" href="section3.html">The Model Catalog</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="section3.html">Troubleshooting</a>
+    <a class="nav-link" href="section4.html">Troubleshooting</a>
   </li>
 </ul>
   </li>
@@ -136,7 +136,7 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_step_1_the_plumbing_infrastructure"><a class="anchor" href="#_step_1_the_plumbing_infrastructure"></a>Step 1: The Plumbing (Infrastructure)</h2>
+<h2 id="_step_1_dependent_infrastructure"><a class="anchor" href="#_step_1_dependent_infrastructure"></a>Step 1: Dependent Infrastructure</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The Model Registry is stateless. Before we can turn it on, we need two things: a <strong>Brain</strong> (Database) and a <strong>Vault</strong> (Object Storage).</p>
@@ -155,6 +155,13 @@
 </div>
 </div>
 </li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Make sure you run the additional output command to set the model registry DB secret.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
 <p><strong>Verify the Pods:</strong>
 Ensure the database and storage are running before proceeding.</p>
@@ -180,15 +187,18 @@ s3-ui-6d87f-rst.                  1/1     Running   0          20s</pre>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_step_2_link_the_model_registry_to_the_database"><a class="anchor" href="#_step_2_link_the_model_registry_to_the_database"></a>Step 2: Link the Model Registry to the Database)</h2>
+<h2 id="_step_2_link_the_model_registry_to_the_database"><a class="anchor" href="#_step_2_link_the_model_registry_to_the_database"></a>Step 2: Link the Model Registry to the Database</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>Edit the name field to change the name of the Model Registry</p>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat &lt;&lt;EOF | oc apply -f -
 apiVersion: modelregistry.opendatahub.io/v1beta1
 kind: ModelRegistry
 metadata:
-  name: model-registry-lab9
+  name: model-registry-name.
   namespace: rhoai-model-registries
 spec:
   grpc:
@@ -213,11 +223,10 @@ EOF</code></pre>
 <div class="paragraph">
 <p>You can check the OpenShift AI UI or run this command to verify that model registry is working as designed.</p>
 </div>
-<div class="paragraph">
-<p>#</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get modelregistries.modelregistry.opendatahub.io -n rhoai-model-registries</code></pre>
 </div>
-<div class="paragraph">
-<p>oc get modelregistries.modelregistry.opendatahub.io -n rhoai-model-registries</p>
 </div>
 </div>
 </div>
@@ -225,7 +234,7 @@ EOF</code></pre>
 <h2 id="_next_step"><a class="anchor" href="#_next_step"></a>Next Step</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Now that the Model Registry is running, it is empty. We need to setup the model registry in RHOAI UI.</p>
+<p>Now that the Model Registry is running, it is empty.</p>
 </div>
 <div class="paragraph">
 <p>You will run a Python automation pipeline that mimics a secure supply chain:</p>
@@ -233,7 +242,7 @@ EOF</code></pre>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p><strong>Downloads</strong> the <code>granite-7b-lab</code> model from Hugging Face (or uses a cached local copy).</p>
+<p><strong>Downloads</strong> the <code>Qwen3-0.6B</code> model from Hugging Face (or uses a cached local copy).</p>
 </li>
 <li>
 <p><strong>Uploads</strong> the weights to your private MinIO "Vault" (ensuring sovereignty).</p>
@@ -265,7 +274,7 @@ Watch the logs. You should see the "Handshake" happen:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">&gt; Connecting to Hugging Face... Done.
-&gt; Downloading 'granite-7b-lab'... Done.
+&gt; Downloading 'Qwen3-0.6B'... Done.
 &gt; Uploading to Private MinIO Bucket (s3://private-models)... Success.
 &gt; Registering with Model Registry API...
 &gt; SUCCESS: Model Registered with ID: 12345</code></pre>
@@ -285,71 +294,12 @@ Watch the logs. You should see the "Handshake" happen:</p>
 <div class="paragraph">
 <p>At this moment, the model is safe in your registry, but the Data Scientists cannot see it yet. The <strong>Model Catalog</strong> in the RHOAI Dashboard is still showing only the public Red Hat default models.</p>
 </div>
-<div class="paragraph">
-<p>We need to apply the "Bridge" — the <code>ModelCatalogSource</code> configuration we discussed in the Architecture section.</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p><strong>Apply the Catalog Configuration:</strong></p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f deploy/catalog/catalog-source.yaml</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p><strong>Verify the Link:</strong></p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get configmap -n redhat-ods-applications -l opendatahub.io/dashboard=true</code></pre>
-</div>
-</div>
-</li>
-</ol>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_step_4_final_verification"><a class="anchor" href="#_step_4_final_verification"></a>Step 4: Final Verification</h2>
-<div class="sectionbody">
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Open your <strong>Red Hat OpenShift AI Dashboard</strong> in your browser.</p>
-</li>
-<li>
-<p>Navigate to the <strong>Model Catalog</strong> tab in the left sidebar.</p>
-</li>
-<li>
-<p>Look for a new section or tab (depending on UI version) labeled <strong>"Private Enterprise Registry"</strong>.</p>
-</li>
-<li>
-<p><strong>Success:</strong> You should see the card for <strong>"Granite 7B Enterprise"</strong>.</p>
-</li>
-<li>
-<p>Click the card. Notice that the deployment source is <strong>NOT</strong> Hugging Face. It is your private S3 bucket URI.</p>
-</li>
-</ol>
-</div>
-<div class="imageblock text-center unresolved">
-<div class="content">
-<img src="private-catalog-card.png" alt="private catalog card">
-</div>
-<div class="title">Figure 1. Your Private Model, Ready for Deployment</div>
-</div>
 <hr>
-<div class="paragraph">
-<p><strong>Congratulations! You have successfully built a private AI Supply Chain. You are no longer dependent on public hubs.</strong></p>
-</div>
-<div class="paragraph">
-<p><a href="#">The QuickStart Lab</a></p>
-</div>
 </div>
 </div>
 <nav class="pagination">
   <span class="prev"><a href="section1.html">Architecture Deep Dive</a></span>
-  <span class="next"><a href="section4.html">The Model Catalog</a></span>
+  <span class="next"><a href="section3.html">The Model Catalog</a></span>
 </nav>
 </article>
   </div>

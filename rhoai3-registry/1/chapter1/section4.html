@@ -4,8 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Lab: Adding Custom Models to the OpenShift AI Model Catalog :: Red Hat OpenShift AI (RHOAI) Model Registry</title>
-    <link rel="prev" href="section2.html">
-    <link rel="next" href="section3.html">
+    <link rel="prev" href="section3.html">
     <meta name="generator" content="Antora 3.1.3">
     <link rel="stylesheet" href="../../../_/css/site.css">
     <script>var uiRootPath = '../../../_'</script>
@@ -48,11 +47,11 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="section2.html">The QuickStart Lab</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
-    <a class="nav-link" href="section4.html">The Model Catalog</a>
-  </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="section3.html">Troubleshooting</a>
+    <a class="nav-link" href="section3.html">The Model Catalog</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="section4.html">Troubleshooting</a>
   </li>
 </ul>
   </li>
@@ -84,7 +83,7 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Red Hat OpenShift AI (RHOAI) Model Registry</a></li>
-    <li><a href="section4.html">The Model Catalog</a></li>
+    <li><a href="section4.html">Troubleshooting</a></li>
   </ul>
 </nav>
 </div>
@@ -158,9 +157,17 @@
 <div class="sect2">
 <h3 id="_3_configure_the_registry_and_add_models"><a class="anchor" href="#_3_configure_the_registry_and_add_models"></a>3. configure the Registry and Add Models</h3>
 <div class="paragraph">
-<p>You need to define two logical "files" inside this ConfigMap:
-1.  <strong><code>sources.yaml</code></strong>: Registers your custom catalog path.
-2.  <strong><code>my-models.yaml</code></strong>: Contains the actual metadata for your models.</p>
+<p>You need to define two logical "files" inside this ConfigMap:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><code>sources.yaml</code></strong>: Registers your custom catalog path.</p>
+</li>
+<li>
+<p><strong><code>my-models.yaml</code></strong>: Contains the actual metadata for your models.</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>Copy and paste the following block into the <code>data:</code> section of the ConfigMap.</p>
@@ -187,7 +194,7 @@ data:
   # FILE 1: The Main Config - Points to your custom file
   sources.yaml: |
     catalogs:
-      - name: "Model-Registry-Models"
+      - name: "Model-Registry-Lab"
         id: "registry-custom-models"
         type: "yaml"
         properties:
@@ -275,6 +282,36 @@ You should see a JSON response containing both <code>"name": "phi-2"</code> and 
 </div>
 </div>
 <div class="sect1">
+<h2 id="_visual_verification"><a class="anchor" href="#_visual_verification"></a>Visual Verification</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Open your <strong>Red Hat OpenShift AI Dashboard</strong> in your browser.</p>
+</li>
+<li>
+<p>Navigate to the <strong>Model Catalog</strong> tab in the left sidebar.</p>
+</li>
+<li>
+<p>Look for a new section or tab (depending on UI version) labeled <strong>"Private Enterprise Registry"</strong>.</p>
+</li>
+<li>
+<p><strong>Success:</strong> You should see the card for <strong>"Granite 7B Enterprise"</strong>.</p>
+</li>
+<li>
+<p>Click the card. Notice that the deployment source is <strong>NOT</strong> Hugging Face. It is your private S3 bucket URI.</p>
+</li>
+</ol>
+</div>
+<div class="imageblock text-center unresolved">
+<div class="content">
+<img src="private-catalog-card.png" alt="private catalog card">
+</div>
+<div class="title">Figure 1. Your Private Model, Ready for Deployment</div>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_troubleshooting"><a class="anchor" href="#_troubleshooting"></a>Troubleshooting</h2>
 <div class="sectionbody">
 <div class="ulist">
@@ -302,8 +339,7 @@ You should see a JSON response containing both <code>"name": "phi-2"</code> and 
 </div>
 </div>
 <nav class="pagination">
-  <span class="prev"><a href="section2.html">The QuickStart Lab</a></span>
-  <span class="next"><a href="section3.html">Troubleshooting</a></span>
+  <span class="prev"><a href="section3.html">The Model Catalog</a></span>
 </nav>
 </article>
   </div>

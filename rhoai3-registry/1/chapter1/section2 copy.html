@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Lab: Automating Model Ingestion with Kubernetes Jobs :: Red Hat OpenShift AI (RHOAI) Model Registry</title>
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Red Hat OpenShift AI (RHOAI) Model Registry</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="rhoai3-registry" data-version="1">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Red Hat OpenShift AI (RHOAI) Model Registry</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Introduction &amp; Value</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="section1.html">Architecture Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="section2.html">The QuickStart Lab</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="section3.html">The Model Catalog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="section4.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Red Hat OpenShift AI (RHOAI) Model Registry</span>
+    <span class="version">1</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Red Hat OpenShift AI (RHOAI) Model Registry</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Red Hat OpenShift AI (RHOAI) Model Registry</a></li>
+    <li><a href="section2%20copy.html">Lab: Automating Model Ingestion with Kubernetes Jobs</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Lab: Automating Model Ingestion with Kubernetes Jobs</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this lab, you will deploy a "Supply Chain" pipeline that runs entirely inside the cluster. Instead of running Python scripts on your laptop (which requires complex networking and dependencies), we will package the logic into a Kubernetes Job.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><strong>User Role:</strong> General User (Project Editor) or Cluster Admin.</p>
+</li>
+<li>
+<p><strong>Namespace:</strong> <code>rhoai-model-registry-lab</code></p>
+</li>
+<li>
+<p><strong>Pre-conditions:</strong></p>
+<div class="ulist">
+<ul>
+<li>
+<p>MinIO and MySQL must be running.</p>
+</li>
+<li>
+<p>The <code>aws-connection-minio</code> Secret must exist (created in the previous infrastructure step).</p>
+</li>
+<li>
+<p>The Registry DB Secret must exist (created manually in the previous step).</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_procedure"><a class="anchor" href="#_procedure"></a>Procedure</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_1_create_the_ingestion_script"><a class="anchor" href="#_1_create_the_ingestion_script"></a>1. Create the Ingestion Script</h3>
+<div class="paragraph">
+<p>We will create a shell script <code>run_ingestion.sh</code> that generates the necessary Kubernetes objects:
+1.  <strong>ServiceAccount:</strong> An identity for our Job to run as.
+2.  <strong>ConfigMap:</strong> Stores our Python ingestion logic.
+3.  <strong>Job:</strong> The execution engine that runs the code.</p>
+</div>
+<div class="paragraph">
+<p>Create a file named <code>run_ingestion.sh</code> with the following content:</p>
+</div>
+<div class="listingblock">
+<div class="title">run_ingestion.sh</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#!/bin/bash
+set -e
+
+# --- CONFIGURATION ---
+NAMESPACE="rhoai-model-registry-lab"
+MODEL_ID="Qwen/Qwen3-0.6B"
+# Use internal cluster DNS for speed and security
+REGISTRY_HOST="model-registry-lab.rhoai-model-registries.svc.cluster.local"
+MINIO_HOST="minio-service.${NAMESPACE}.svc.cluster.local"
+SERVICE_ACCOUNT="model-ingestion-sa"
+
+echo "🚀 Preparing Supply Chain Job for $MODEL_ID..."
+
+# -----------------------------------------------------------------------------
+# 1. Create Service Account
+# We use a dedicated identity for this job for better audit trails.
+# -----------------------------------------------------------------------------
+echo "➤ Ensuring ServiceAccount '$SERVICE_ACCOUNT' exists..."
+cat &lt;&lt;EOF | oc apply -n $NAMESPACE -f -
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: $SERVICE_ACCOUNT
+  labels:
+    app: model-supply-chain
+EOF
+
+# -----------------------------------------------------------------------------
+# 2. Embed the Python Logic (ConfigMap)
+# -----------------------------------------------------------------------------
+cat &lt;&lt;EOF &gt; ingest_and_register.py
+import os
+import boto3
+from huggingface_hub import snapshot_download
+from model_registry import ModelRegistry
+from botocore.client import Config
+
+# --- CONFIGURATION ---
+MODEL_ID = "${MODEL_ID}"
+VERSION = "1.0.0"
+S3_BUCKET = "private-models"
+
+# Env vars provided by the Job
+REGISTRY_HOST = os.getenv("REGISTRY_HOST")
+REGISTRY_PORT = int(os.getenv("REGISTRY_PORT", 8080))
+AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+S3_ENDPOINT = os.getenv("AWS_S3_ENDPOINT")
+
+def log(msg): print(f"[PIPELINE]: {msg}")
+
+def main():
+    print(f"\n=== STEP 1: ACQUIRING ASSETS ===")
+    log(f"Downloading '{MODEL_ID}' from Hugging Face...")
+    # Using a cache dir explicitly to avoid permission issues in some UBI images
+    local_dir = snapshot_download(repo_id=MODEL_ID,
+                                  cache_dir="/tmp/hf_cache",
+                                  allow_patterns=["*.json", "*.safetensors", "*.model", "tokenizer*"])
+
+    print(f"\n=== STEP 2: SECURING ASSETS (MINIO) ===")
+    log(f"Connecting to Vault at {S3_ENDPOINT}...")
+
+    s3 = boto3.client('s3',
+                      endpoint_url=S3_ENDPOINT,
+                      aws_access_key_id=AWS_ACCESS_KEY,
+                      aws_secret_access_key=AWS_SECRET_KEY,
+                      config=Config(signature_version='s3v4'))
+
+    # Ensure bucket exists
+    try:
+        s3.create_bucket(Bucket=S3_BUCKET)
+    except:
+        pass
+
+    # Upload files
+    s3_prefix = f"{MODEL_ID.replace('/', '-')}/{VERSION}"
+    log(f"Uploading to s3://{S3_BUCKET}/{s3_prefix}...")
+
+    for root, dirs, files in os.walk(local_dir):
+        for file in files:
+            local_path = os.path.join(root, file)
+            relative_path = os.path.relpath(local_path, local_dir)
+            s3_key = os.path.join(s3_prefix, relative_path)
+            s3.upload_file(local_path, S3_BUCKET, s3_key)
+
+    s3_uri = f"s3://{S3_BUCKET}/{s3_prefix}"
+    log(f"Upload Complete: {s3_uri}")
+
+    print(f"\n=== STEP 3: GOVERNANCE (MODEL REGISTRY) ===")
+    log(f"Connecting to Registry at {REGISTRY_HOST}:{REGISTRY_PORT}...")
+
+    # Connect to Registry using the official Python client
+    registry = ModelRegistry(server_address=REGISTRY_HOST, port=REGISTRY_PORT, author="LabUser", is_secure=False)
+
+    log(f"Registering Model: {MODEL_ID}")
+
+    model = registry.register_model(
+        MODEL_ID,
+        s3_uri,
+        model_format_name="safetensors",
+        model_format_version="1.0",
+        version=VERSION,
+        description="Qwen3 Small Language Model imported from Hugging Face",
+        metadata={
+            "source": "huggingface",
+            "original_repo": MODEL_ID,
+            "license": "Apache 2.0",
+            "is_governed": "true"
+        }
+    )
+
+    print(f"\n✅ SUCCESS: Supply Chain Complete!")
+    print(f"    Model ID: {model.id}")
+    print(f"    Version: {VERSION}")
+
+if __name__ == "__main__":
+    main()
+EOF
+
+echo "➤ Creating ConfigMap 'ingestion-code'..."
+oc create configmap ingestion-code --from-file=ingest_and_register.py -n "$NAMESPACE" --dry-run=client -o yaml | oc apply -f -
+rm ingest_and_register.py # Cleanup
+
+# -----------------------------------------------------------------------------
+# 3. Submit the Job
+# -----------------------------------------------------------------------------
+echo "➤ Submitting Kubernetes Job..."
+cat &lt;&lt;YAML | oc apply -f -
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: model-ingest-job
+  namespace: $NAMESPACE
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      serviceAccountName: $SERVICE_ACCOUNT
+      containers:
+      - name: ingestor
+        # Use Red Hat UBI Python image for better OpenShift compatibility
+        image: registry.access.redhat.com/ubi9/python-39:latest
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            echo "Installing dependencies..."
+            # Install to user directory to avoid permission errors
+            pip install boto3 huggingface-hub model-registry==0.2.3 requests --quiet --no-cache-dir
+            echo "Starting Ingestion..."
+            python /scripts/ingest_and_register.py
+        volumeMounts:
+        - name: code-volume
+          mountPath: /scripts
+        env:
+        - name: REGISTRY_HOST
+          value: "$REGISTRY_HOST"
+        - name: REGISTRY_PORT
+          value: "8080"
+        # Inject credentials from the 'aws-connection-minio' secret
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-connection-minio
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-connection-minio
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_S3_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: aws-connection-minio
+              key: AWS_S3_ENDPOINT
+      restartPolicy: Never
+      volumes:
+      - name: code-volume
+        configMap:
+          name: ingestion-code
+YAML
+
+echo "⏳ Job submitted. Streaming logs..."
+sleep 5
+oc logs job/model-ingest-job -n "$NAMESPACE" -f</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_2_execute_the_pipeline"><a class="anchor" href="#_2_execute_the_pipeline"></a>2. Execute the Pipeline</h3>
+<div class="paragraph">
+<p>Run the script to build and execute the job.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">chmod +x run_ingestion.sh
+./run_ingestion.sh</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_3_verification"><a class="anchor" href="#_3_verification"></a>3. Verification</h3>
+<div class="paragraph">
+<p>Once the job completes with <code>✅ SUCCESS</code>, verify the results.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Check the S3 Vault:</strong></p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># List objects in the private bucket
+oc rsh -n rhoai-model-registry-lab deployment/minio -- mc ls local/private-models</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Check the Model Registry:</strong></p>
+<div class="paragraph">
+<p>Navigate to the OpenShift AI Dashboard &#8594; <strong>Model Registry</strong>. You should see the <strong>Qwen/Qwen3-0.6B</strong> model listed with Version 1.0.0.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
