@@ -206,7 +206,7 @@ data:
   # FILE 1: The Main Config - Points to your custom file
   sources.yaml: |
     catalogs:
-      - name: "Model-Registry-Models"
+      - name: "Model-Registry-Lab"
         id: "registry-custom-models"
         type: "yaml"
         properties:
@@ -247,59 +247,60 @@ data:
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p><strong>Ingestion (The Download):</strong></p>
+<p><strong>Setup the Stage (Deploy MySQL &amp; Minio):</strong></p>
 <div class="ulist">
 <ul>
 <li>
-<p>A Python script authenticates with Hugging Face (or another source).</p>
+<p>Clone the Git repository</p>
 </li>
 <li>
-<p>It downloads the raw files to a temporary workspace.</p>
+<p>Execute the setup.sh script</p>
 </li>
 </ul>
 </div>
 </li>
 <li>
-<p><strong>Storage (The Storage):</strong></p>
+<p><strong>Configure the Registry (Connect the Registry to the DB):</strong></p>
 <div class="ulist">
 <ul>
 <li>
-<p>The script uploads the files to your private S3 bucket (e.g., <code>s3://my-private-models/granite-7b/v1/</code>).</p>
+<p>use the Model Registry API to add a new Model Registry</p>
 </li>
 <li>
-<p><strong>Result:</strong> The data is now safe and sovereign.</p>
+<p>Connect it to the DB from step1</p>
 </li>
 </ul>
 </div>
 </li>
-<li>
-<p><strong>Registration (The Model Registry):</strong></p>
-<div class="ulist">
-<ul>
-<li>
-<p>The script calls the Model Registry API.</p>
-</li>
-<li>
-<p>It sends a JSON payload: "I have a model named 'Granite', Version '1.0', located at 's3://&#8230;&#8203;'"</p>
-</li>
-<li>
-<p><strong>Result:</strong> The Registry generates a unique ID and stamps the entry.</p>
-</li>
-</ul>
+</ol>
 </div>
-</li>
+<div class="paragraph">
+<p>3a. <strong>Ingestion (The Download):</strong>
+    * A Python script authenticates with Hugging Face (or another source).
+    * It downloads the raw files to a temporary workspace.</p>
+</div>
+<div class="paragraph">
+<p>3b.  <strong>Storage (The Storage):</strong>
+    * The script uploads the files to your private S3 bucket (e.g., <code>s3://my-private-models/granite-7b/v1/</code>).
+    * <strong>Result:</strong> The data is now safe and sovereign.</p>
+</div>
+<div class="paragraph">
+<p>3c.  <strong>Registration (The Model Registry):</strong>
+    * The script calls the Model Registry API.
+    * It sends a JSON payload: "I have a model named 'Granite', Version '1.0', located at 's3://&#8230;&#8203;'"
+    * <strong>Result:</strong> The Registry generates a unique ID and stamps the entry.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
 <p><strong>Visibility (The Model Catalog):</strong></p>
 <div class="ulist">
 <ul>
 <li>
-<p>A Data Scientist opens the RHOAI Dashboard.</p>
+<p>Edit the Model catalog source ConfigMap</p>
 </li>
 <li>
-<p>They see the "Granite 7B" card.</p>
-</li>
-<li>
-<p>When they click "Deploy," RHOAI reads the S3 URI from the Registry and pulls the weights directly from your private bucket—<strong>never</strong> touching the public internet.</p>
+<p>Add the yaml files to the config map</p>
 </li>
 </ul>
 </div>
@@ -348,18 +349,6 @@ data:
 <td class="tableblock halign-left valign-top"><p class="tableblock"><strong>OpenShift AI</strong></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">v3.0</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The Platform</p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Database</strong></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">MySQL v8.0</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Registry Backend</p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Storage</strong></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">MinIO (or S3)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Artifact Storage</p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
