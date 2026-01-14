@@ -67,7 +67,7 @@ cat <<EOF | oc apply -f -
 apiVersion: modelregistry.opendatahub.io/v1beta1
 kind: ModelRegistry
 metadata:
-  name: model-registry-name 
+  name: model-registry-lab 
   namespace: rhoai-model-registries   
 spec:
   grpc:

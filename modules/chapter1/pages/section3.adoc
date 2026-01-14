@@ -117,10 +117,8 @@ oc get pods -l component=model-catalog -w
 1.  Open your **Red Hat OpenShift AI Dashboard** in your browser.
 2.  Navigate to the **Model Catalog** tab in the left sidebar.
 3.  Look for a new section or tab (depending on UI version) labeled **"Private Enterprise Registry"**.
-4.  **Success:** You should see the card for **"Granite 7B Enterprise"**.
+4.  **Success:** You should see the card for **"Qwen3-0.6B"**.
 5.  Click the card. Notice that the deployment source is **NOT** Hugging Face. It is your private S3 bucket URI.
-
-image::private-catalog-card.png[align="center", title="Your Private Model, Ready for Deployment"]
 
 == Troubleshooting
 
@@ -129,5 +127,5 @@ image::private-catalog-card.png[align="center", title="Your Private Model, Ready
 * **Error:** `sources.yaml: no such file or directory`
     * **Fix:** You likely accidentally deleted the `sources.yaml` key in the ConfigMap. Re-copy the full YAML block from Step 3.
 * **Dashboard Issue:** Models not visible in the UI.
-    * **Fix:** In the OpenShift AI Model Catalog, check the **Source** filter. Uncheck "Red Hat AI" and ensure "Training Lab Models" (or "All sources") is selected.
+    * **Fix:** In the OpenShift AI Model Catalog, check the **Source** filter. Uncheck "Red Hat AI" and ensure "Model-Registry-Lab" (or "All sources") is selected.
 

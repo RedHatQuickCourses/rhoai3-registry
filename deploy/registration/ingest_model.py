@@ -65,3 +65,30 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+cat <<EOF | oc apply -f -
+apiVersion: modelregistry.opendatahub.io/v1beta1
+kind: ModelRegistry
+metadata:
+  name: model-registry-lab
+  namespace: rhoai-model-registries
+spec:
+  grpc:
+    port: 9090
+  rest:
+    port: 8080
+  mysql:
+    # NETWORK BRIDGE: We use the full DNS name to reach the lab namespace
+    host: "mysql.rhoai-model-registry-lab.svc.cluster.local"
+    port: 3306
+    database: "sampledb"
+    username: "admin"
+    passwordSecret:
+      name: "registry-db-secret"
+      key: "database-password"
+    sslMode: "disable"
+
+  # (Optional) If using Postgres instead of MySQL, use the 'postgres' block instead.
+EOF
