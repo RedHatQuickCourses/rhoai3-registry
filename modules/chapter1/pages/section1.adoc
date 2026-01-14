@@ -62,7 +62,7 @@ data:
   # FILE 1: The Main Config - Points to your custom file
   sources.yaml: |
     catalogs:
-      - name: "Model-Registry-Models"
+      - name: "Model-Registry-Lab"
         id: "registry-custom-models"
         type: "yaml"
         properties:
@@ -94,23 +94,30 @@ data:
 
 Understanding the flow for the hands-on lab you are about to perform.
 
-1.  **Ingestion (The Download):**
+1.  **Setup the Stage (Deploy MySQL & Minio):**
+ * Clone the Git repository
+ * Execute the setup.sh script
+
+2. **Configure the Registry (Connect the Registry to the DB):**
+ * use the Model Registry API to add a new Model Registry
+ * Connect it to the DB from step1
+
+3a. **Ingestion (The Download):**
     * A Python script authenticates with Hugging Face (or another source).
     * It downloads the raw files to a temporary workspace.
 
-2.  **Storage (The Storage):**
+3b.  **Storage (The Storage):**
     * The script uploads the files to your private S3 bucket (e.g., `s3://my-private-models/granite-7b/v1/`).
     * *Result:* The data is now safe and sovereign.
 
-3.  **Registration (The Model Registry):**
+3c.  **Registration (The Model Registry):**
     * The script calls the Model Registry API.
     * It sends a JSON payload: "I have a model named 'Granite', Version '1.0', located at 's3://...'"
     * *Result:* The Registry generates a unique ID and stamps the entry.
 
 4.  **Visibility (The Model Catalog):**
-    * A Data Scientist opens the RHOAI Dashboard.
-    * They see the "Granite 7B" card.
-    * When they click "Deploy," RHOAI reads the S3 URI from the Registry and pulls the weights directly from your private bucket—**never** touching the public internet.
+    * Edit the Model catalog source ConfigMap
+    * Add the yaml files to the config map
 
 5.  **Discovery (The Consumption):**
     * A Data Scientist opens the RHOAI Dashboard.
@@ -124,8 +131,6 @@ To build this architecture in the next module, your cluster must meet these mini
 |===
 | Component | Requirement | Role |
 | **OpenShift AI** | v3.0 | The Platform |
-| **Database** | MySQL v8.0 | Registry Backend |
-| **Storage** | MinIO (or S3) | Artifact Storage |
 | **Compute** | 2 vCPUs, 4GB RAM | For Registry & DB Pods |
 |===
 ---
