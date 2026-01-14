@@ -20,7 +20,7 @@ fi
 echo "----------------------------------------------------------------"
 echo "Step 1: Running Data Ingestion..."
 # We explicitly set the internal endpoints, though the python script defaults to them.
-export S3_ENDPOINT="http://minio-service.rhoai-model-registry.svc.cluster.local:9000"
+export S3_ENDPOINT="http://minio-service.rhoai-model-registry-lab.svc.cluster.local:9000"
 python3 deploy/registration/ingest_model.py
 
 # Check if previous command failed
@@ -32,7 +32,7 @@ fi
 # 3. Run Registration (Internal MinIO -> Internal Registry)
 echo "----------------------------------------------------------------"
 echo "Step 2: Running Metadata Registration..."
-export REGISTRY_HOST="model-registry-service.rhoai-model-registry.svc.cluster.local"
+export REGISTRY_HOST="model-registry-service.rhoai-model-registries.svc.cluster.local"
 export REGISTRY_PORT="8080"
 python3 deploy/registration/register_model.py
 

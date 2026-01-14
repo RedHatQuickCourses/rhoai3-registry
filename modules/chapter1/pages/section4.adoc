@@ -37,8 +37,9 @@ You are editing a **ConfigMap**, not a local file. The file `sources.yaml` exist
 === 3. configure the Registry and Add Models
 
 You need to define two logical "files" inside this ConfigMap:
-1.  **`sources.yaml`**: Registers your custom catalog path.
-2.  **`my-models.yaml`**: Contains the actual metadata for your models.
+
+ 1.  **`sources.yaml`**: Registers your custom catalog path.
+ 2.  **`my-models.yaml`**: Contains the actual metadata for your models.
 
 Copy and paste the following block into the `data:` section of the ConfigMap.
 
@@ -57,7 +58,7 @@ data:
   # FILE 1: The Main Config - Points to your custom file
   sources.yaml: |
     catalogs:
-      - name: "Model-Registry-Models"
+      - name: "Model-Registry-Lab"
         id: "registry-custom-models"
         type: "yaml"
         properties:
@@ -124,6 +125,16 @@ curl -s "http://localhost:8080/api/model_catalog/v1alpha1/models?source=lab-cust
 
 **Expected Output:**
 You should see a JSON response containing both `"name": "phi-2"` and `"name": "granite-7b-lab"`.
+
+== Visual Verification
+
+1.  Open your **Red Hat OpenShift AI Dashboard** in your browser.
+2.  Navigate to the **Model Catalog** tab in the left sidebar.
+3.  Look for a new section or tab (depending on UI version) labeled **"Private Enterprise Registry"**.
+4.  **Success:** You should see the card for **"Granite 7B Enterprise"**.
+5.  Click the card. Notice that the deployment source is **NOT** Hugging Face. It is your private S3 bucket URI.
+
+image::private-catalog-card.png[align="center", title="Your Private Model, Ready for Deployment"]
 
 == Troubleshooting
 

@@ -3,7 +3,7 @@ from model_registry import ModelRegistry
 
 # --- CONFIGURATION (Defaults for In-Cluster Execution) ---
 # Internal K8s DNS for Registry Service
-REGISTRY_HOST = os.getenv("REGISTRY_HOST", "model-registry-service.rhoai-model-registry.svc.cluster.local")
+REGISTRY_HOST = os.getenv("REGISTRY_HOST", "model-registry-service.rhoai-model-registries.svc.cluster.local")
 REGISTRY_PORT = int(os.getenv("REGISTRY_PORT", 8080))
 MODEL_NAME = "Granite-7B-Enterprise"
 VERSION = "1.0.0"
@@ -34,11 +34,11 @@ def register():
         model_format_name="safetensors", 
         model_format_version="1.0",
         version=VERSION,
-        description="Approved Granite 7B model for internal RAG applications.",
+        description="Approved Qwen3-0.6B model for internal RAG applications.",
         metadata={
             "approved_for_production": "true",
             "license": "Apache-2.0",
-            "source_repo": "ibm-granite/granite-7b-lab"
+            "source_repo": "Qwen/Qwen3-0.6B"
         }
     )
 

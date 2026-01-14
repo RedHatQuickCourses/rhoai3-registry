@@ -4,9 +4,9 @@ from huggingface_hub import snapshot_download
 from botocore.client import Config
 
 # --- CONFIGURATION (Defaults for In-Cluster Execution) ---
-MODEL_ID = os.getenv("MODEL_ID", "ibm-granite/granite-7b-lab")
+MODEL_ID = os.getenv("MODEL_ID", "Qwen/Qwen3-0.6B")
 # Internal K8s DNS for MinIO Service
-S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://minio-service.rhoai-model-registry.svc.cluster.local:9000")
+S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://minio-service.rhoai-model-registry-lab.svc.cluster.local:9000")
 S3_BUCKET = os.getenv("S3_BUCKET", "private-models")
 AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY", "minio")
 AWS_SECRET_KEY = os.getenv("AWS_SECRET_KEY", "minio123")
@@ -56,7 +56,7 @@ def main():
                                   allow_patterns=["*.json", "*.safetensors", "*.model"])
     
     print(f"=== STEP 2: SECURING ASSETS ===")
-    s3_uri = upload_to_s3(local_dir, "granite-7b-v1")
+    s3_uri = upload_to_s3(local_dir, "Qwen3-0.6B")
     
     print(f"\n✅ SUCCESS: Model Secured at {s3_uri}")
     # Write URI to file for the next script to read

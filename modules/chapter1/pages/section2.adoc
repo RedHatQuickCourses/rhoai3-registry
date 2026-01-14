@@ -25,7 +25,7 @@ In this lab, you will take on the role of a **Lead Platform Engineer**. Your Dat
 ----
 ====
 
-== Step 1: The Plumbing (Infrastructure)
+== Step 1: Dependent Infrastructure
 
 The Model Registry is stateless. Before we can turn it on, we need two things: a **Brain** (Database) and a **Vault** (Object Storage).
 
@@ -38,6 +38,8 @@ We have provided a script that deploys a MySQL 8.0 instance and a MinIO object s
 chmod u+x ./deploy/setup.sh \
 ./deploy/setup.sh
 ----
+
+Make sure you run the additional output command to set the model registry DB secret.
 
 . **Verify the Pods:**
 Ensure the database and storage are running before proceeding.
@@ -55,7 +57,9 @@ minio-7b9c2-abc                   1/1     Running   0          45s
 s3-ui-6d87f-rst.                  1/1     Running   0          20s
 ----
 
-== Step 2: Link the Model Registry to the Database)
+== Step 2: Link the Model Registry to the Database
+
+Edit the name field to change the name of the Model Registry
 
 [source,bash]
 ----
@@ -63,7 +67,7 @@ cat <<EOF | oc apply -f -
 apiVersion: modelregistry.opendatahub.io/v1beta1
 kind: ModelRegistry
 metadata:
-  name: model-registry-lab9
+  name: model-registry-name. 
   namespace: rhoai-model-registries   
 spec:
   grpc:
@@ -87,16 +91,18 @@ EOF
 
 You can check the OpenShift AI UI or run this command to verify that model registry is working as designed. 
 
-# 
-
+[source,bash]
+----
 oc get modelregistries.modelregistry.opendatahub.io -n rhoai-model-registries  
+----
+
 
 == Next Step
-Now that the Model Registry is running, it is empty. We need to setup the model registry in RHOAI UI.
+Now that the Model Registry is running, it is empty.
 
 You will run a Python automation pipeline that mimics a secure supply chain:
 
- 1.  **Downloads** the `granite-7b-lab` model from Hugging Face (or uses a cached local copy).
+ 1.  **Downloads** the `Qwen3-0.6B` model from Hugging Face (or uses a cached local copy).
  2.  **Uploads** the weights to your private MinIO "Vault" (ensuring sovereignty).
  3.  **Registers** the metadata (Version 1.0.0, Author: You) into the MySQL "Brain."
 
@@ -121,7 +127,7 @@ Watch the logs. You should see the "Handshake" happen:
 [source,text]
 ----
 > Connecting to Hugging Face... Done.
-> Downloading 'granite-7b-lab'... Done.
+> Downloading 'Qwen3-0.6B'... Done.
 > Uploading to Private MinIO Bucket (s3://private-models)... Success.
 > Registering with Model Registry API...
 > SUCCESS: Model Registered with ID: 12345
@@ -131,33 +137,4 @@ Watch the logs. You should see the "Handshake" happen:
 
 At this moment, the model is safe in your registry, but the Data Scientists cannot see it yet. The **Model Catalog** in the RHOAI Dashboard is still showing only the public Red Hat default models.
 
-We need to apply the "Bridge" — the `ModelCatalogSource` configuration we discussed in the Architecture section.
-
-. **Apply the Catalog Configuration:**
-+
-[source,bash]
-----
-oc apply -f deploy/catalog/catalog-source.yaml
-----
-
-. **Verify the Link:**
-+
-[source,bash]
-----
-oc get configmap -n redhat-ods-applications -l opendatahub.io/dashboard=true
-----
-
-== Step 4: Final Verification
-
-1.  Open your **Red Hat OpenShift AI Dashboard** in your browser.
-2.  Navigate to the **Model Catalog** tab in the left sidebar.
-3.  Look for a new section or tab (depending on UI version) labeled **"Private Enterprise Registry"**.
-4.  **Success:** You should see the card for **"Granite 7B Enterprise"**.
-5.  Click the card. Notice that the deployment source is **NOT** Hugging Face. It is your private S3 bucket URI.
-
-image::private-catalog-card.png[align="center", title="Your Private Model, Ready for Deployment"]
-
 ---
-*Congratulations! You have successfully built a private AI Supply Chain. You are no longer dependent on public hubs.*
-
-xref:section2.adoc[The QuickStart Lab]
