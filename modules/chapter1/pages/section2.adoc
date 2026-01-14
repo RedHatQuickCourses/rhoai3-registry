@@ -67,7 +67,7 @@ cat <<EOF | oc apply -f -
 apiVersion: modelregistry.opendatahub.io/v1beta1
 kind: ModelRegistry
 metadata:
-  name: model-registry-name. 
+  name: model-registry-name 
   namespace: rhoai-model-registries   
 spec:
   grpc:
@@ -98,21 +98,15 @@ oc get modelregistries.modelregistry.opendatahub.io -n rhoai-model-registries
 
 
 == Next Step
+
 Now that the Model Registry is running, it is empty.
 
-You will run a Python automation pipeline that mimics a secure supply chain:
+You will run an automation pipeline that mimics a secure supply chain:
 
  1.  **Downloads** the `Qwen3-0.6B` model from Hugging Face (or uses a cached local copy).
  2.  **Uploads** the weights to your private MinIO "Vault" (ensuring sovereignty).
  3.  **Registers** the metadata (Version 1.0.0, Author: You) into the MySQL "Brain."
 
-. **Install Dependencies (Optional):**
-If running locally, ensure you have the python clients installed.
-+
-[source,bash]
-----
-pip install -r deploy/registration/requirements.txt
-----
 
 . **Execute the Pipeline:**
 +
