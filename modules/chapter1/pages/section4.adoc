@@ -20,7 +20,7 @@ If the Registry API is not responding, or if your Python scripts fail with `500 
 **Check 1: Is the Pod Running?**
 [source,bash]
 ----
-oc get pods -n rhoai-model-registry -l app=model-registry-service
+oc get pods -n rhoai-model-registry-lab -l app=model-registry-service
 ----
 * *Status `CrashLoopBackOff`:* Usually means the database connection failed.
 * *Status `ImagePullBackOff`:* Check your cluster's internet connectivity or image registry credentials.

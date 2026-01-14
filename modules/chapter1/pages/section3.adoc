@@ -41,7 +41,7 @@ You need to define two logical "files" inside this ConfigMap:
  1.  **`sources.yaml`**: Registers your custom catalog path.
  2.  **`my-models.yaml`**: Contains the actual metadata for your models.
 
-Copy and paste the following block into the `data:` section of the ConfigMap.
+Copy and paste the following data segment of the block into the `data:` section of the ConfigMap.
 
 .Understanding the Schema
 * **Top-Level Fields:** Only `name`, `description`, `readme`, and `maturity` are allowed here.
@@ -49,11 +49,11 @@ Copy and paste the following block into the `data:` section of the ConfigMap.
 
 [source,yaml]
 ----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: model-catalog-sources
-  namespace: rhoai-model-registries
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: model-catalog-sources
+#   namespace: rhoai-model-registries
 data:
   # FILE 1: The Main Config - Points to your custom file
   sources.yaml: |
