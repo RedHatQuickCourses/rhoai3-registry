@@ -198,7 +198,7 @@ s3-ui-6d87f-rst.                  1/1     Running   0          20s</pre>
 apiVersion: modelregistry.opendatahub.io/v1beta1
 kind: ModelRegistry
 metadata:
-  name: model-registry-name.
+  name: model-registry-name
   namespace: rhoai-model-registries
 spec:
   grpc:
@@ -237,7 +237,7 @@ EOF</code></pre>
 <p>Now that the Model Registry is running, it is empty.</p>
 </div>
 <div class="paragraph">
-<p>You will run a Python automation pipeline that mimics a secure supply chain:</p>
+<p>You will run an automation pipeline that mimics a secure supply chain:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -251,15 +251,6 @@ EOF</code></pre>
 <p><strong>Registers</strong> the metadata (Version 1.0.0, Author: You) into the MySQL "Brain."</p>
 <div class="olist arabic">
 <ol class="arabic">
-<li>
-<p><strong>Install Dependencies (Optional):</strong>
-If running locally, ensure you have the python clients installed.</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">pip install -r deploy/registration/requirements.txt</code></pre>
-</div>
-</div>
-</li>
 <li>
 <p><strong>Execute the Pipeline:</strong></p>
 <div class="listingblock">
