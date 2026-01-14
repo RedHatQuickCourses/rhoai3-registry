@@ -35,7 +35,8 @@ We have provided a script that deploys a MySQL 8.0 instance and a MinIO object s
 +
 [source,bash]
 ----
-chmod u+x ./deploy/setup.sh \
+chmod u+x ./deploy/setup.sh
+
 ./deploy/setup.sh
 ----
 
@@ -112,6 +113,8 @@ You will run an automation pipeline that mimics a secure supply chain:
 +
 [source,bash]
 ----
+chmod u+x ./deploy/run_pipeline.sh
+
 ./deploy/run_pipeline.sh
 ----
 
