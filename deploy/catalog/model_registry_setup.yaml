@@ -1,7 +1,7 @@
 apiVersion: modelregistry.opendatahub.io/v1beta1
 kind: ModelRegistry
 metadata:
-  name: model-registry-lab9
+  name: model-registry-lab #The name of Model Registry in RHOAI
   namespace: rhoai-model-registries   
 spec:
   grpc:
