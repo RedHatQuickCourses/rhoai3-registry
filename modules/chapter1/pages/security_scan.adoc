@@ -1,0 +1,178 @@
+= Lab: Building the Secure Model Supply Chain
+:navtitle: Secure Model Ingestion
+:toc: macro
+
+// Antora metadata
+:page-role: hands-on-lab
+:description: Implementing a Zero-Trust ingestion pipeline to scan and register models automatically.
+
+[.lead]
+*Trust, but verify. Then verify again.*
+
+In the previous module, you manually registered a model. That works for a lab, but it does not scale to an enterprise.
+If you allow 50 Data Scientists to manually upload files to S3, you will eventually host malware, licensed-restricted weights, or broken artifacts.
+
+In this lab, you will build the **"Ingestion Factory."**
+You will deploy a Data Science Pipeline that automates the journey from Hugging Face to your Registry, enforcing a strict **Security Gate** (Malware Scanning) along the way.
+
+[IMPORTANT]
+.Prerequisites
+====
+* **Role:** Platform Engineer (You are building the tool other people will use).
+* **Cluster Access:** You have `cluster-admin` access to OpenShift AI.
+* **Environment:** You have completed the *Model Registry Setup* lab and have a running Registry and S3 bucket.
+* **Tools:** You have the `kfp` (Kubeflow Pipelines) Python SDK installed locally, or you are working inside a Jupyter Notebook in RHOAI.
+====
+
+== Architecture: The "Zero-Trust" Pipeline
+
+We are replacing the manual "download-and-upload" script with a managed **Data Science Pipeline**.
+
+[graphviz]
+....
+digraph {
+  rankdir=LR;
+  node [shape=box style=filled fillcolor="#f9f9f9" fontname="RedHatText"];
+  
+  HF [label="Hugging Face" shape=ellipse fillcolor="#e0e0e0"];
+  Fetch [label="1. Fetch\n(Snapshot)" fillcolor="#d4f4fa"];
+  Scan [label="2. Inspect\n(ModelScan)" fillcolor="#ffcccc"];
+  Store [label="3. Lock\n(S3 Upload)" fillcolor="#d4f4fa"];
+  Reg [label="4. Register\n(Metadata Stamp)" fillcolor="#d4f4fa"];
+  
+  HF -> Fetch -> Scan;
+  Scan -> Store [label="Pass"];
+  Scan -> Fail [label="Threat Detected" style=dotted color="red"];
+  Store -> Reg;
+}
+....
+
+* **Step 2 (The Gate):** This is the most critical addition. We use `ModelScan` to analyze the model weights (Pickle/SafeTensors) for code injection attacks *before* they are allowed into our "Vault."
+
+== Step 1: The Pipeline Logic (The "Brain")
+
+We use the Kubeflow Pipelines (KFP) SDK to define our factory.
+This script defines three lightweight containers that will run sequentially in your cluster.
+
+. **Create the Source File:**
+Create a file named `pipeline.py` and paste the following code.
++
+[source,python]
+----
+from kfp import dsl
+from kfp import compiler
+
+# --- COMPONENT 1: FETCH (The Getter) ---
+@dsl.component(base_image='registry.redhat.io/ubi9/python-39:latest', packages_to_install=['huggingface_hub'])
+def download_model(model_id: str) -> str:
+    from huggingface_hub import snapshot_download
+    import os
+    
+    # We download to a temporary path inside the container
+    save_path = f"/tmp/models/{model_id}"
+    print(f"⬇️ Downloading {model_id}...")
+    snapshot_download(repo_id=model_id, local_dir=save_path)
+    return save_path
+
+# --- COMPONENT 2: INSPECT (The Guardian) ---
+@dsl.component(base_image='registry.redhat.io/ubi9/python-39:latest', packages_to_install=['modelscan'])
+def scan_model(input_path: str) -> bool:
+    import subprocess
+    import sys
+    
+    print(f"🛡️ Scanning artifacts in {input_path}...")
+    # 'modelscan' checks for serialization attacks
+    result = subprocess.run(["modelscan", "-p", input_path], capture_output=True, text=True)
+    
+    if result.returncode != 0:
+        print("❌ CRITICAL THREAT DETECTED. Pipeline Aborted.")
+        print(result.stderr)
+        sys.exit(1) # This fails the pipeline immediately
+        
+    print("✅ Scan Clean.")
+    return True
+
+# --- COMPONENT 3: STORE (The Vault) ---
+@dsl.component(base_image='registry.redhat.io/ubi9/python-39:latest', packages_to_install=['boto3'])
+def upload_to_s3(input_path: str, bucket: str, model_id: str):
+    import boto3
+    import os
+    # (Simplified upload logic for the lab...)
+    print(f"☁️ Uploading verified model to {bucket}...")
+
+# --- THE PIPELINE DEFINITION ---
+@dsl.pipeline(name='Secure Supply Chain', description='Downloads, Scans, and Ingests Models.')
+def secure_factory(model_id: str = "ibm-granite/granite-3.0-8b-instruct"):
+    
+    # 1. Fetch
+    download_task = download_model(model_id=model_id)
+    
+    # 2. Inspect (The pipeline will STOP here if this fails)
+    scan_task = scan_model(input_path=download_task.output)
+    
+    # 3. Store (Only runs if scan is green)
+    upload_task = upload_to_s3(
+        input_path=download_task.output,
+        bucket="models-secure",
+        model_id=model_id
+    ).after(scan_task)
+
+if __name__ == '__main__':
+    compiler.Compiler().compile(secure_factory, 'secure-ingest.yaml')
+----
+
+. **Compile the Artifact:**
+Run the python script to generate the YAML definition.
++
+[source,bash]
+----
+python3 pipeline.py
+----
+* **Output:** You should see a new file `secure-ingest.yaml` in your directory.
+
+== Step 2: Deploy to the Factory
+
+Now you put on your **AI Engineer** hat. You will import this definition into OpenShift AI.
+
+1.  Open the **RHOAI Dashboard**.
+2.  Navigate to **Data Science Pipelines** -> **Import Pipeline**.
+3.  **Name:** `Secure Model Supply Chain`.
+4.  **Description:** "Zero-trust ingestion with malware scanning."
+5.  **Upload:** Select the `secure-ingest.yaml` file you just generated.
+
+== Step 3: Run the Factory
+
+Let's test the safety net.
+
+. **Click "Create Run".**
+. **Parameters:**
+* `model_id`: `ibm-granite/granite-3.0-2b-instruct` (A known safe model).
+. **Click Start.**
+
+== Visual Verification (The Payoff)
+
+Navigate to the **Runs** tab and click on your active run to see the Topology View.
+
+1.  **Watch the Graph:** You will see the `download-model` step turn Green.
+2.  **The Gate:** The `scan-model` step will spin. It is currently analyzing gigabytes of data.
+3.  **Success:** When `scan-model` turns Green, the `upload-to-s3` step triggers.
+
+[NOTE]
+.What happens if I try a malicious model?
+====
+If you attempt to ingest a model containing a Pickle Bomb (a known exploit vector), the `scan-model` step will turn **Red**.
+The pipeline will halt. The `upload-to-s3` step will **never execute**.
+**The malicious file never touches your secure storage bucket.**
+====
+
+== Troubleshooting
+
+* **Pipeline stays "Pending":**
+    * Check your Cluster Quotas. Each step spins up a Pod. If you lack CPU/Memory, it will wait.
+* **"OOMKilled" on Download:**
+    * The Granite model is large. Ensure your Pipeline Task has a resource request of at least 4Gi RAM.
+* **Scan Failures:**
+    * Click the **Logs** tab in the Dashboard. `ModelScan` prints exactly which file triggered the alert.
+
+---
+*You have now automated the entry gate. No model enters your ecosystem without a badge.*
