@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Lab: Building the Secure Model Supply Chain :: Red Hat OpenShift AI (RHOAI) Model Registry</title>
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Red Hat OpenShift AI (RHOAI) Model Registry</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="rhoai3-registry" data-version="1">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Red Hat OpenShift AI (RHOAI) Model Registry</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Introduction &amp; Value</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="section1.html">Architecture Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="section2.html">The QuickStart Lab</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="section3.html">The Model Catalog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="section4.html">Troubleshooting</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Red Hat OpenShift AI (RHOAI) Model Registry</span>
+    <span class="version">1</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Red Hat OpenShift AI (RHOAI) Model Registry</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Red Hat OpenShift AI (RHOAI) Model Registry</a></li>
+    <li><a href="security_scan.html">Lab: Building the Secure Model Supply Chain</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Lab: Building the Secure Model Supply Chain</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph lead">
+<p><strong>Trust, but verify. Then verify again.</strong></p>
+</div>
+<div class="paragraph">
+<p>In the previous module, you manually registered a model. That works for a lab, but it does not scale to an enterprise.
+If you allow 50 Data Scientists to manually upload files to S3, you will eventually host malware, licensed-restricted weights, or broken artifacts.</p>
+</div>
+<div class="paragraph">
+<p>In this lab, you will build the <strong>"Ingestion Factory."</strong>
+You will deploy a Data Science Pipeline that automates the journey from Hugging Face to your Registry, enforcing a strict <strong>Security Gate</strong> (Malware Scanning) along the way.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="title">Prerequisites</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Role:</strong> Platform Engineer (You are building the tool other people will use).</p>
+</li>
+<li>
+<p><strong>Cluster Access:</strong> You have <code>cluster-admin</code> access to OpenShift AI.</p>
+</li>
+<li>
+<p><strong>Environment:</strong> You have completed the <strong>Model Registry Setup</strong> lab and have a running Registry and S3 bucket.</p>
+</li>
+<li>
+<p><strong>Tools:</strong> You have the <code>kfp</code> (Kubeflow Pipelines) Python SDK installed locally, or you are working inside a Jupyter Notebook in RHOAI.</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_architecture_the_zero_trust_pipeline"><a class="anchor" href="#_architecture_the_zero_trust_pipeline"></a>Architecture: The "Zero-Trust" Pipeline</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We are replacing the manual "download-and-upload" script with a managed <strong>Data Science Pipeline</strong>.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>digraph {
+  rankdir=LR;
+  node [shape=box style=filled fillcolor="#f9f9f9" fontname="RedHatText"];
+
+  HF [label="Hugging Face" shape=ellipse fillcolor="#e0e0e0"];
+  Fetch [label="1. Fetch\n(Snapshot)" fillcolor="#d4f4fa"];
+  Scan [label="2. Inspect\n(ModelScan)" fillcolor="#ffcccc"];
+  Store [label="3. Lock\n(S3 Upload)" fillcolor="#d4f4fa"];
+  Reg [label="4. Register\n(Metadata Stamp)" fillcolor="#d4f4fa"];
+
+  HF -&gt; Fetch -&gt; Scan;
+  Scan -&gt; Store [label="Pass"];
+  Scan -&gt; Fail [label="Threat Detected" style=dotted color="red"];
+  Store -&gt; Reg;
+}</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Step 2 (The Gate):</strong> This is the most critical addition. We use <code>ModelScan</code> to analyze the model weights (Pickle/SafeTensors) for code injection attacks <strong>before</strong> they are allowed into our "Vault."</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_step_1_the_pipeline_logic_the_brain"><a class="anchor" href="#_step_1_the_pipeline_logic_the_brain"></a>Step 1: The Pipeline Logic (The "Brain")</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We use the Kubeflow Pipelines (KFP) SDK to define our factory.
+This script defines three lightweight containers that will run sequentially in your cluster.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Create the Source File:</strong>
+Create a file named <code>pipeline.py</code> and paste the following code.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from kfp import dsl
+from kfp import compiler
+
+# --- COMPONENT 1: FETCH (The Getter) ---
+@dsl.component(base_image='registry.redhat.io/ubi9/python-39:latest', packages_to_install=['huggingface_hub'])
+def download_model(model_id: str) -&gt; str:
+    from huggingface_hub import snapshot_download
+    import os
+
+    # We download to a temporary path inside the container
+    save_path = f"/tmp/models/{model_id}"
+    print(f"⬇️ Downloading {model_id}...")
+    snapshot_download(repo_id=model_id, local_dir=save_path)
+    return save_path
+
+# --- COMPONENT 2: INSPECT (The Guardian) ---
+@dsl.component(base_image='registry.redhat.io/ubi9/python-39:latest', packages_to_install=['modelscan'])
+def scan_model(input_path: str) -&gt; bool:
+    import subprocess
+    import sys
+
+    print(f"🛡️ Scanning artifacts in {input_path}...")
+    # 'modelscan' checks for serialization attacks
+    result = subprocess.run(["modelscan", "-p", input_path], capture_output=True, text=True)
+
+    if result.returncode != 0:
+        print("❌ CRITICAL THREAT DETECTED. Pipeline Aborted.")
+        print(result.stderr)
+        sys.exit(1) # This fails the pipeline immediately
+
+    print("✅ Scan Clean.")
+    return True
+
+# --- COMPONENT 3: STORE (The Vault) ---
+@dsl.component(base_image='registry.redhat.io/ubi9/python-39:latest', packages_to_install=['boto3'])
+def upload_to_s3(input_path: str, bucket: str, model_id: str):
+    import boto3
+    import os
+    # (Simplified upload logic for the lab...)
+    print(f"☁️ Uploading verified model to {bucket}...")
+
+# --- THE PIPELINE DEFINITION ---
+@dsl.pipeline(name='Secure Supply Chain', description='Downloads, Scans, and Ingests Models.')
+def secure_factory(model_id: str = "ibm-granite/granite-3.0-8b-instruct"):
+
+    # 1. Fetch
+    download_task = download_model(model_id=model_id)
+
+    # 2. Inspect (The pipeline will STOP here if this fails)
+    scan_task = scan_model(input_path=download_task.output)
+
+    # 3. Store (Only runs if scan is green)
+    upload_task = upload_to_s3(
+        input_path=download_task.output,
+        bucket="models-secure",
+        model_id=model_id
+    ).after(scan_task)
+
+if __name__ == '__main__':
+    compiler.Compiler().compile(secure_factory, 'secure-ingest.yaml')</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Compile the Artifact:</strong>
+Run the python script to generate the YAML definition.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">python3 pipeline.py</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Output:</strong> You should see a new file <code>secure-ingest.yaml</code> in your directory.</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_step_2_deploy_to_the_factory"><a class="anchor" href="#_step_2_deploy_to_the_factory"></a>Step 2: Deploy to the Factory</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now you put on your <strong>AI Engineer</strong> hat. You will import this definition into OpenShift AI.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Open the <strong>RHOAI Dashboard</strong>.</p>
+</li>
+<li>
+<p>Navigate to <strong>Data Science Pipelines</strong> &#8594; <strong>Import Pipeline</strong>.</p>
+</li>
+<li>
+<p><strong>Name:</strong> <code>Secure Model Supply Chain</code>.</p>
+</li>
+<li>
+<p><strong>Description:</strong> "Zero-trust ingestion with malware scanning."</p>
+</li>
+<li>
+<p><strong>Upload:</strong> Select the <code>secure-ingest.yaml</code> file you just generated.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_step_3_run_the_factory"><a class="anchor" href="#_step_3_run_the_factory"></a>Step 3: Run the Factory</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s test the safety net.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Click "Create Run".</strong></p>
+</li>
+<li>
+<p><strong>Parameters:</strong></p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>model_id</code>: <code>ibm-granite/granite-3.0-2b-instruct</code> (A known safe model).</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Click Start.</strong></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_visual_verification_the_payoff"><a class="anchor" href="#_visual_verification_the_payoff"></a>Visual Verification (The Payoff)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Navigate to the <strong>Runs</strong> tab and click on your active run to see the Topology View.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Watch the Graph:</strong> You will see the <code>download-model</code> step turn Green.</p>
+</li>
+<li>
+<p><strong>The Gate:</strong> The <code>scan-model</code> step will spin. It is currently analyzing gigabytes of data.</p>
+</li>
+<li>
+<p><strong>Success:</strong> When <code>scan-model</code> turns Green, the <code>upload-to-s3</code> step triggers.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="title">What happens if I try a malicious model?</div>
+<div class="paragraph">
+<p>If you attempt to ingest a model containing a Pickle Bomb (a known exploit vector), the <code>scan-model</code> step will turn <strong>Red</strong>.
+The pipeline will halt. The <code>upload-to-s3</code> step will <strong>never execute</strong>.
+<strong>The malicious file never touches your secure storage bucket.</strong></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_troubleshooting"><a class="anchor" href="#_troubleshooting"></a>Troubleshooting</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Pipeline stays "Pending":</strong></p>
+</li>
+<li>
+<p>Check your Cluster Quotas. Each step spins up a Pod. If you lack CPU/Memory, it will wait.</p>
+</li>
+<li>
+<p><strong>"OOMKilled" on Download:</strong></p>
+</li>
+<li>
+<p>The Granite model is large. Ensure your Pipeline Task has a resource request of at least 4Gi RAM.</p>
+</li>
+<li>
+<p><strong>Scan Failures:</strong></p>
+</li>
+<li>
+<p>Click the <strong>Logs</strong> tab in the Dashboard. <code>ModelScan</code> prints exactly which file triggered the alert.</p>
+</li>
+</ul>
+</div>
+<hr>
+<div class="paragraph">
+<p><strong>You have now automated the entry gate. No model enters your ecosystem without a badge.</strong></p>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
