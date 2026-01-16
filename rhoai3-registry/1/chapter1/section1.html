@@ -265,34 +265,40 @@ data:
 </li>
 <li>
 <p>Connect it to the DB from step1</p>
-<div class="literalblock">
-<div class="content">
-<pre>3a. **Ingestion (the Download):**</pre>
-</div>
+</li>
+</ul>
 </div>
 </li>
+<li>
+<p><strong>Ingestion (the Download):</strong></p>
+<div class="ulist">
+<ul>
 <li>
 <p>A Python script authenticates with Hugging Face (or another source).</p>
 </li>
 <li>
 <p>It downloads the raw files to a temporary workspace.</p>
-<div class="literalblock">
-<div class="content">
-<pre>3b.  **Storage (the Storage):**</pre>
-</div>
+</li>
+</ul>
 </div>
 </li>
+<li>
+<p><strong>Storage (the Storage):</strong></p>
+<div class="ulist">
+<ul>
 <li>
 <p>The script uploads the files to your private S3 bucket (e.g., <code>s3://my-private-models/granite-7b/v1/</code>).</p>
 </li>
 <li>
 <p><strong>Result:</strong> The data is now safe and sovereign.</p>
-<div class="literalblock">
-<div class="content">
-<pre>3c.  **Registration (the Model Registry):**</pre>
-</div>
+</li>
+</ul>
 </div>
 </li>
+<li>
+<p><strong>Registration (the Model Registry):</strong></p>
+<div class="ulist">
+<ul>
 <li>
 <p>The script calls the Model Registry API.</p>
 </li>
