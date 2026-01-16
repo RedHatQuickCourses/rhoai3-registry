@@ -268,43 +268,34 @@ data:
 </li>
 <li>
 <p>Connect it to the DB from step1</p>
-</li>
-</ul>
+<div class="literalblock">
+<div class="content">
+<pre>3a. **Ingestion (the Download):**</pre>
+</div>
 </div>
 </li>
-</ol>
-</div>
-<div class="paragraph">
-<p>3a. <strong>Ingestion (the Download):</strong></p>
-</div>
-<div class="ulist">
-<ul>
 <li>
 <p>A Python script authenticates with Hugging Face (or another source).</p>
 </li>
 <li>
 <p>It downloads the raw files to a temporary workspace.</p>
+<div class="literalblock">
+<div class="content">
+<pre>3b.  **Storage (the Storage):**</pre>
+</div>
+</div>
 </li>
-</ul>
-</div>
-<div class="paragraph">
-<p>3b.  <strong>Storage (the Storage):</strong></p>
-</div>
-<div class="ulist">
-<ul>
 <li>
 <p>The script uploads the files to your private S3 bucket (e.g., <code>s3://my-private-models/granite-7b/v1/</code>).</p>
 </li>
 <li>
 <p><strong>Result:</strong> The data is now safe and sovereign.</p>
+<div class="literalblock">
+<div class="content">
+<pre>3c.  **Registration (the Model Registry):**</pre>
+</div>
+</div>
 </li>
-</ul>
-</div>
-<div class="paragraph">
-<p>3c.  <strong>Registration (the Model Registry):</strong></p>
-</div>
-<div class="ulist">
-<ul>
 <li>
 <p>The script calls the Model Registry API.</p>
 </li>
@@ -313,27 +304,27 @@ data:
 </li>
 <li>
 <p><strong>Result:</strong> The Registry generates a unique ID and stamps the entry.</p>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p><strong>Visibility (the Model Catalog):</strong></p>
 </li>
-</ol>
+</ul>
 </div>
 </li>
+<li>
+<p><strong>Visibility (the Model Catalog):</strong></p>
+<div class="ulist">
+<ul>
 <li>
 <p>Edit the Model catalog source ConfigMap,</p>
 </li>
 <li>
 <p>Add the yaml files to the ConfigMap,</p>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p><strong>Discovery (the Consumption):</strong></p>
 </li>
-</ol>
+</ul>
 </div>
 </li>
+<li>
+<p><strong>Discovery (the Consumption):</strong></p>
+<div class="ulist">
+<ul>
 <li>
 <p>A data scientist opens the RHOAI Dashboard.</p>
 </li>
@@ -344,6 +335,9 @@ data:
 <p>When they click "Deploy," RHOAI reads the S3 URI from the Registry and pulls the weights directly from your private bucket—<strong>never</strong> touching the public internet.</p>
 </li>
 </ul>
+</div>
+</li>
+</ol>
 </div>
 </div>
 </div>

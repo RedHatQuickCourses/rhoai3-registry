@@ -97,10 +97,10 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph lead">
-<p><strong>Theory is over. It is time to build.</strong></p>
+<p><strong>Theory is over. Now It&#8217;s is time to build.</strong></p>
 </div>
 <div class="paragraph">
-<p>In this lab, you will take on the role of a <strong>Lead Platform Engineer</strong>. Your Data Science team has been downloading models randomly from Hugging Face. Your task is to establish order by deploying a <strong>Private Model Registry</strong> and forcing all future deployments to go through this governed gate.</p>
+<p>In this lab, you will take on the role of a <strong>lead platform engineer</strong>. Your data science team has been downloading models randomly from Hugging Face. Your task is to establish order by deploying a <strong>Private Model Registry</strong> and forcing all future deployments to go through this governed gate.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -113,13 +113,13 @@
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Cluster Access:</strong> You are logged into an OpenShift AI 3.0 cluster via terminal (<code>oc login</code>).</p>
+<p><strong>Cluster access:</strong> You are logged into an OpenShift AI 3.0 cluster via terminal (<code>oc login</code>).</p>
 </li>
 <li>
 <p><strong>Permissions:</strong> You have <code>cluster-admin</code> or sufficient namespace privileges.</p>
 </li>
 <li>
-<p><strong>Repository:</strong> You have cloned the course repository:</p>
+<p><strong>Repository:</strong> You have cloned the course repository as follows:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">  git clone https://github.com/RedHatQuickCourses/rhoai3-registry.git
@@ -139,7 +139,7 @@
 <h2 id="_step_1_dependent_infrastructure"><a class="anchor" href="#_step_1_dependent_infrastructure"></a>Step 1: Dependent Infrastructure</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Model Registry is stateless. Before we can turn it on, we need two things: a <strong>Brain</strong> (Database) and a <strong>Vault</strong> (Object Storage).</p>
+<p>The Model Registry is stateless. Before you can turn it on, you need two things: a <strong>Brain</strong> (database) and a <strong>Vault</strong> (object storage).</p>
 </div>
 <div class="paragraph">
 <p>We have provided a script that deploys a MySQL 8.0 instance and a MinIO object store into a new namespace called <code>rhoai-model-registry-lab</code>.</p>
@@ -150,13 +150,16 @@
 <p><strong>Run the Setup Script:</strong></p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">chmod u+x ./deploy/setup.sh
-
-./deploy/setup.sh</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">chmod u+x ./deploy/setup.sh</code></pre>
 </div>
 </div>
 </li>
 </ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">./deploy/setup.sh</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>Make sure you run the additional output command to set the model registry DB secret.</p>
@@ -222,7 +225,7 @@ EOF</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You can check the OpenShift AI UI or run this command to verify that model registry is working as designed.</p>
+<p>You can check the OpenShift AI UI or run the following command to verify that the model registry is working as designed.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -232,13 +235,13 @@ EOF</code></pre>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_next_step"><a class="anchor" href="#_next_step"></a>Next Step</h2>
+<h2 id="_step_3"><a class="anchor" href="#_step_3"></a>Step 3</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Now that the Model Registry is running, it is empty.</p>
 </div>
 <div class="paragraph">
-<p>You will run an automation pipeline that mimics a secure supply chain:</p>
+<p>Next, run an automation pipeline that mimics a secure supply chain:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -264,7 +267,7 @@ EOF</code></pre>
 </li>
 <li>
 <p><strong>Observe the Output:</strong>
-Watch the logs. You should see the "Handshake" happen:</p>
+Watch the logs. You should see the "handshake" happen:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">&gt; Connecting to Hugging Face... Done.
@@ -283,10 +286,10 @@ Watch the logs. You should see the "Handshake" happen:</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_step_3_the_payoff_connecting_the_catalog"><a class="anchor" href="#_step_3_the_payoff_connecting_the_catalog"></a>Step 3: The Payoff (Connecting the Catalog)</h2>
+<h2 id="_step_4_connect_the_catalog"><a class="anchor" href="#_step_4_connect_the_catalog"></a>Step 4: Connect the Catalog</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>At this moment, the model is safe in your registry, but the Data Scientists cannot see it yet. The <strong>Model Catalog</strong> in the RHOAI Dashboard is still showing only the public Red Hat default models.</p>
+<p>At this moment, the model is safe in your registry, but the data scientists cannot see it yet. The <strong>Model Catalog</strong> in the RHOAI Dashboard is still showing only the public Red Hat default models.</p>
 </div>
 <hr>
 </div>
