@@ -26,7 +26,7 @@ This is the brain of the operation. It exposes a REST API that allows users and 
 
 
  * **Technology:** A Golang-based service managed by the `model-registry-operator`.
- * **Backend:** Requires a MySQL 8.x or MariaDB database.
+ * **Backend:** Requires a MySQL 8.x or Postgres database.
  * **Function:** Enforces the schema. It ensures that every registered model has the required fields (e.g., you cannot register a model without a version number).
 
 === 2. The Artifact Storage (Data Plane)
