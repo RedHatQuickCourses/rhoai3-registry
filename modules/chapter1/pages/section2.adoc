@@ -7,16 +7,16 @@
 :description: Step-by-step guide to deploying the registry, ingesting a model, and connecting the catalog.
 
 [.lead]
-*Theory is over. It is time to build.*
+*Theory is over. Now It's is time to build.*
 
-In this lab, you will take on the role of a **Lead Platform Engineer**. Your Data Science team has been downloading models randomly from Hugging Face. Your task is to establish order by deploying a **Private Model Registry** and forcing all future deployments to go through this governed gate.
+In this lab, you will take on the role of a **lead platform engineer**. Your data science team has been downloading models randomly from Hugging Face. Your task is to establish order by deploying a **Private Model Registry** and forcing all future deployments to go through this governed gate.
 
 [IMPORTANT]
 .Prerequisites
 ====
-* **Cluster Access:** You are logged into an OpenShift AI 3.0 cluster via terminal (`oc login`).
+* **Cluster access:** You are logged into an OpenShift AI 3.0 cluster via terminal (`oc login`).
 * **Permissions:** You have `cluster-admin` or sufficient namespace privileges.
-* **Repository:** You have cloned the course repository:
+* **Repository:** You have cloned the course repository as follows:
 +
 [source,bash]
 ----
@@ -27,7 +27,7 @@ In this lab, you will take on the role of a **Lead Platform Engineer**. Your Dat
 
 == Step 1: Dependent Infrastructure
 
-The Model Registry is stateless. Before we can turn it on, we need two things: a **Brain** (Database) and a **Vault** (Object Storage).
+The Model Registry is stateless. Before you can turn it on, you need two things: a **Brain** (database) and a **Vault** (object storage).
 
 We have provided a script that deploys a MySQL 8.0 instance and a MinIO object store into a new namespace called `rhoai-model-registry-lab`.
 
@@ -37,12 +37,18 @@ We have provided a script that deploys a MySQL 8.0 instance and a MinIO object s
 ----
 chmod u+x ./deploy/setup.sh
 
-./deploy/setup.sh
 ----
+
+[source,bash]
+----
+./deploy/setup.sh
+
+----
+
 
 Make sure you run the additional output command to set the model registry DB secret.
 
-. **Verify the Pods:**
+2. **Verify the Pods:**
 Ensure the database and storage are running before proceeding.
 +
 [source,bash]
@@ -90,7 +96,7 @@ spec:
 EOF 
 ----
 
-You can check the OpenShift AI UI or run this command to verify that model registry is working as designed. 
+You can check the OpenShift AI UI or run the following command to verify that the model registry is working as designed. 
 
 [source,bash]
 ----
@@ -98,11 +104,11 @@ oc get modelregistries.modelregistry.opendatahub.io -n rhoai-model-registries
 ----
 
 
-== Next Step
+== Step 3
 
 Now that the Model Registry is running, it is empty.
 
-You will run an automation pipeline that mimics a secure supply chain:
+Next, run an automation pipeline that mimics a secure supply chain:
 
  1.  **Downloads** the `Qwen3-0.6B` model from Hugging Face (or uses a cached local copy).
  2.  **Uploads** the weights to your private MinIO "Vault" (ensuring sovereignty).
@@ -119,7 +125,7 @@ chmod u+x ./deploy/run_pipeline.sh
 ----
 
 . **Observe the Output:**
-Watch the logs. You should see the "Handshake" happen:
+Watch the logs. You should see the "handshake" happen:
 +
 [source,text]
 ----
@@ -130,8 +136,8 @@ Watch the logs. You should see the "Handshake" happen:
 > SUCCESS: Model Registered with ID: 12345
 ----
 
-== Step 3: The Payoff (Connecting the Catalog)
+== Step 4: Connect the Catalog
 
-At this moment, the model is safe in your registry, but the Data Scientists cannot see it yet. The **Model Catalog** in the RHOAI Dashboard is still showing only the public Red Hat default models.
+At this moment, the model is safe in your registry, but the data scientists cannot see it yet. The **Model Catalog** in the RHOAI Dashboard is still showing only the public Red Hat default models.
 
 ---

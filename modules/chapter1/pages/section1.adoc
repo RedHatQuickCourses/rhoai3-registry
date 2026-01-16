@@ -94,38 +94,38 @@ data:
 
 Understanding the flow for the hands-on lab you are about to perform.
 
-1.  **Setup the Stage (Deploy MySQL & Minio):**
+ 1.  **Setup the Stage (Deploy MySQL & Minio):**
 
  * Clone the Git repository
  * Execute the setup.sh script
 
-2. **Configure the Registry (Connect the Registry to the DB):**
+ 2. **Configure the Registry (Connect the Registry to the DB):**
 
  * Use the Model Registry API to add a new Model Registry
  * Connect it to the DB from step1
 
-3a. **Ingestion (the Download):**
+ 3a. **Ingestion (the Download):**
 
     * A Python script authenticates with Hugging Face (or another source).
     * It downloads the raw files to a temporary workspace.
 
-3b.  **Storage (the Storage):**
+ 3b.  **Storage (the Storage):**
 
     * The script uploads the files to your private S3 bucket (e.g., `s3://my-private-models/granite-7b/v1/`).
     * *Result:* The data is now safe and sovereign.
 
-3c.  **Registration (the Model Registry):**
+ 3c.  **Registration (the Model Registry):**
 
     * The script calls the Model Registry API.
     * It sends a JSON payload: "I have a model named 'Granite', Version '1.0', located at 's3://...'"
     * *Result:* The Registry generates a unique ID and stamps the entry.
 
-4.  **Visibility (the Model Catalog):**
+ 4.  **Visibility (the Model Catalog):**
 
     * Edit the Model catalog source ConfigMap,
     * Add the yaml files to the ConfigMap,
 
-5.  **Discovery (the Consumption):**
+ 5.  **Discovery (the Consumption):**
 
     * A data scientist opens the RHOAI Dashboard.
     * They see the "Granite 2B" card.

@@ -34,7 +34,7 @@ oc edit configmap model-catalog-sources
 You are editing a **ConfigMap**, not a local file. The file `sources.yaml` exists virtually inside the `data` section of this object.
 ====
 
-=== 3. configure the Registry and Add Models
+=== 3. Configure the Registry and Add Models
 
 You need to define two logical "files" inside this ConfigMap:
 
@@ -88,7 +88,7 @@ data:
 
 === 4. Save and Exit
 
-* **Vi/Vim Users:** Press `Esc`, then type `:wq` and hit `Enter`.
+* **Vi/Vim Users:** Press `Esc`, then type `:wq` and press `Enter`.
 * **Nano Users:** Press `Ctrl+O`, `Enter`, then `Ctrl+X`.
 
 If the edit is successful, you will see:
@@ -98,7 +98,7 @@ If the edit is successful, you will see:
 
 The catalog service attempts to "hot reload" changes, but it is best practice in a lab environment to restart the pod to ensure a clean state and immediate update.
 
-Waiting two minutes worked everytime, the below is just in case your impatient.
+Waiting two minutes worked everytime, the following steps are presented here just in case you're impatient.
 
 [source,bash]
 ----
@@ -122,10 +122,10 @@ oc get pods -l component=model-catalog -w
 
 == Troubleshooting
 
-* **Error:** `json: unknown field "author"`
-    * **Fix:** You placed `author` at the top level of the YAML. Move it inside `customProperties`.
-* **Error:** `sources.yaml: no such file or directory`
-    * **Fix:** You likely accidentally deleted the `sources.yaml` key in the ConfigMap. Re-copy the full YAML block from Step 3.
-* **Dashboard Issue:** Models not visible in the UI.
-    * **Fix:** In the OpenShift AI Model Catalog, check the **Source** filter. Uncheck "Red Hat AI" and ensure "Model-Registry-Lab" (or "All sources") is selected.
+ * **Error:** `json: unknown field "author"`
+    ** **Fix:** You placed `author` at the top level of the YAML. Move it inside `customProperties`.
+ * **Error:** `sources.yaml: no such file or directory`
+    ** **Fix:** You likely accidentally deleted the `sources.yaml` key in the ConfigMap. Re-copy the full YAML block from Step 3.
+ * **Dashboard Issue:** Models not visible in the UI.
+    ** **Fix:** In the OpenShift AI Model Catalog, check the **Source** filter. Uncheck "Red Hat AI" and ensure "Model-Registry-Lab" (or "All sources") is selected.
 
