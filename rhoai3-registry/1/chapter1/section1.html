@@ -97,7 +97,7 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph lead">
-<p><strong>A "Registry" is not a "Repository." Understanding the difference is key to a scalable AI Platform.</strong></p>
+<p><strong>A "registry" is not a "repository." Understanding the difference is key to a scalable AI platform.</strong></p>
 </div>
 <div class="paragraph">
 <p>To build a private AI Factory, you must distinguish between <strong>where the data lives</strong> and <strong>how the data is governed</strong>. In Red Hat OpenShift AI (RHOAI), we decouple these two concerns to ensure performance, security, and flexibility.</p>
@@ -113,10 +113,10 @@
 <div class="ulist">
 <ul>
 <li>
-<p><strong>The Control Plane (The "Librarian"):</strong> The <strong>Model Registry</strong> itself. It is a lightweight metadata service backed by a relational database (MySQL). It knows <strong>about</strong> the models (Author, Version, License, Metrics) but does not hold the files.</p>
+<p><strong>The Control Plane (The "librarian"):</strong> This is the <strong>Model Registry</strong> itself. It is a lightweight metadata service backed by a relational database (MySQL). It knows <strong>about</strong> the models (e.g., author, version, license, metrics) but does not hold the files.</p>
 </li>
 <li>
-<p><strong>The Data Plane (The "Bookshelf"):</strong> Your object storage (S3/MinIO/Quay/Ceph). This is where the heavy artifacts (Safetensors, ONNX files, configs) actually reside.</p>
+<p><strong>The Data Plane (The "bookshelf"):</strong> This is your object storage (S3/MinIO/Quay/Ceph). The Data Plane is where the heavy artifacts (e.g., Safetensors, ONNX files, configs) actually reside.</p>
 </li>
 </ul>
 </div>
@@ -158,20 +158,20 @@
 <p><strong>Security:</strong> This bucket should be <strong>private</strong>. Only the specific Service Accounts used by your pipelines and serving runtimes should have read access.</p>
 </li>
 <li>
-<p><strong>The "Golden Image" Concept:</strong> Once a model version is uploaded here and registered, the file should be treated as <strong>immutable</strong>.</p>
+<p><strong>The "Golden Image" concept:</strong> Once a model version is uploaded here and registered, the file should be treated as <strong>immutable</strong>.</p>
 </li>
 </ul>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_3_the_model_catalog_the_showroom"><a class="anchor" href="#_3_the_model_catalog_the_showroom"></a>3. The Model Catalog (The "Showroom")</h3>
+<h3 id="_3_the_model_catalog_the_showroom"><a class="anchor" href="#_3_the_model_catalog_the_showroom"></a>3. The Model Catalog (the "Showroom")</h3>
 <div class="paragraph">
-<p>The Catalog is where AI Developers and Data Scientists browse available models. By default, it shows Red Hat Validated (ready for inference) and Red Hat AI models (ready for tuning pipeline). You&#8217;ll find model like (Granite, DeepSeekR1 and Llama). To show <strong>your</strong> private models, we must explicitly connect the two.</p>
+<p>The Catalog is where AI developers and data scientists browse available models. By default, it shows Red Hat Validated (ready for inference) and Red Hat AI models (ready for tuning pipeline). You&#8217;ll find models like Granite, DeepSeekR1 and Llama. To show <strong>your</strong> private models, we must explicitly connect the two.</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>The Mechanism:</strong> The RHOAI Dashboard reads from <strong>Catalog Sources</strong>.</p>
+<p><strong>The Mechanism:</strong> The RHOAI Dashboard reads from <strong>Catalog sources</strong>.</p>
 </li>
 <li>
 <p><strong>The Integration:</strong> The Model Catalog does not use a database for configuration; it uses a Kubernetes <strong>ConfigMap</strong>. You will edit this object directly to add your model details.</p>
@@ -264,7 +264,7 @@ data:
 <div class="ulist">
 <ul>
 <li>
-<p>use the Model Registry API to add a new Model Registry</p>
+<p>Use the Model Registry API to add a new Model Registry</p>
 </li>
 <li>
 <p>Connect it to the DB from step1</p>
@@ -275,42 +275,67 @@ data:
 </ol>
 </div>
 <div class="paragraph">
-<p>3a. <strong>Ingestion (The Download):</strong>
-    * A Python script authenticates with Hugging Face (or another source).
-    * It downloads the raw files to a temporary workspace.</p>
+<p>3a. <strong>Ingestion (the Download):</strong></p>
 </div>
-<div class="paragraph">
-<p>3b.  <strong>Storage (The Storage):</strong>
-    * The script uploads the files to your private S3 bucket (e.g., <code>s3://my-private-models/granite-7b/v1/</code>).
-    * <strong>Result:</strong> The data is now safe and sovereign.</p>
-</div>
-<div class="paragraph">
-<p>3c.  <strong>Registration (The Model Registry):</strong>
-    * The script calls the Model Registry API.
-    * It sends a JSON payload: "I have a model named 'Granite', Version '1.0', located at 's3://&#8230;&#8203;'"
-    * <strong>Result:</strong> The Registry generates a unique ID and stamps the entry.</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p><strong>Visibility (The Model Catalog):</strong></p>
 <div class="ulist">
 <ul>
 <li>
-<p>Edit the Model catalog source ConfigMap</p>
+<p>A Python script authenticates with Hugging Face (or another source).</p>
 </li>
 <li>
-<p>Add the yaml files to the config map</p>
+<p>It downloads the raw files to a temporary workspace.</p>
 </li>
 </ul>
 </div>
-</li>
-<li>
-<p><strong>Discovery (The Consumption):</strong></p>
+<div class="paragraph">
+<p>3b.  <strong>Storage (the Storage):</strong></p>
+</div>
 <div class="ulist">
 <ul>
 <li>
-<p>A Data Scientist opens the RHOAI Dashboard.</p>
+<p>The script uploads the files to your private S3 bucket (e.g., <code>s3://my-private-models/granite-7b/v1/</code>).</p>
+</li>
+<li>
+<p><strong>Result:</strong> The data is now safe and sovereign.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>3c.  <strong>Registration (the Model Registry):</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The script calls the Model Registry API.</p>
+</li>
+<li>
+<p>It sends a JSON payload: "I have a model named 'Granite', Version '1.0', located at 's3://&#8230;&#8203;'"</p>
+</li>
+<li>
+<p><strong>Result:</strong> The Registry generates a unique ID and stamps the entry.</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Visibility (the Model Catalog):</strong></p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Edit the Model catalog source ConfigMap,</p>
+</li>
+<li>
+<p>Add the yaml files to the ConfigMap,</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Discovery (the Consumption):</strong></p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>A data scientist opens the RHOAI Dashboard.</p>
 </li>
 <li>
 <p>They see the "Granite 2B" card.</p>
@@ -319,9 +344,6 @@ data:
 <p>When they click "Deploy," RHOAI reads the S3 URI from the Registry and pulls the weights directly from your private bucket—<strong>never</strong> touching the public internet.</p>
 </li>
 </ul>
-</div>
-</li>
-</ol>
 </div>
 </div>
 </div>

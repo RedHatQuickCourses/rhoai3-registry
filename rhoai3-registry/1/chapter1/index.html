@@ -95,16 +95,16 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph lead">
-<p><strong>Stop treating AI like a Science Fair. Start building a Factory.</strong></p>
+<p><strong>Stop treating AI like a science fair. Start building a factory.</strong></p>
 </div>
 <div class="paragraph">
-<p>In the world of software development, no enterprise would allow developers to email zip files of source code to one another. We use Git. We use version control. We use pipelines.</p>
+<p>In the world of software development, no enterprise would allow developers to email zip files of source code to one another. They use Git. They use version control. They use pipelines.</p>
 </div>
 <div class="paragraph">
-<p>Yet, in the world of artificial intelligence, this "wild west" approach is exactly what is happening today. Data scientists download gigabytes of open-source models (LLMs) to personal laptops, store weights in random S3 buckets, and deploy "magic black boxes" with no history, no lineage, and no security audit.</p>
+<p>Yet, in the world of artificial intelligence, this "wild west" approach is typical. Data scientists download gigabytes of open-source models (LLMs) to personal laptops, store weights in random S3 buckets, and deploy "magic black boxes" with no history, no lineage, and no security audit.</p>
 </div>
 <div class="paragraph">
-<p>This is <strong>Shadow AI</strong>. And it is the primary blocker to enterprise adoption.</p>
+<p>This is <strong>shadow AI</strong>. And it is the primary blocker to enterprise adoption.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -118,7 +118,7 @@
 <p><strong>"Why should we build a private Model Registry when we can just use Hugging Face or public APIs?"</strong></p>
 </div>
 <div class="paragraph">
-<p><strong>The Answer:</strong> Because you cannot govern what you do not own. Public hubs are for <strong>discovery</strong>; your private registry is for <strong>control, sovereignty, and compliance.</strong></p>
+<p>Because you cannot govern what you do not own. Public hubs are for <strong>discovery</strong>; your private registry is for <strong>control, sovereignty, and compliance.</strong></p>
 </div>
 </td>
 </tr>
@@ -130,10 +130,10 @@
 <h2 id="_the_solution_the_model_registry"><a class="anchor" href="#_the_solution_the_model_registry"></a>The Solution: The Model Registry</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The <strong>Red Hat OpenShift AI (RHOAI) Model Registry</strong> is the "title office" for your organization&#8217;s intellectual property. It transforms a scattered collection of model files into a governed <strong>AI Supply Chain</strong>.</p>
+<p>The <strong>Red Hat OpenShift AI (RHOAI) Model Registry</strong> is the "title office" for your organization&#8217;s intellectual property. It transforms a scattered collection of model files into a governed <strong>AI supply chain</strong>.</p>
 </div>
 <div class="paragraph">
-<p>It serves as the bridge between the chaotic world of experimentation and the rigid world of production operations.</p>
+<p>The Model Registry serves as the bridge between the chaotic world of experimentation and the rigid world of production operations.</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
@@ -157,10 +157,10 @@
 <div class="ulist">
 <ul>
 <li>
-<p><strong>The Win:</strong> The Model Registry keeps the model metadata strictly within your hybrid cloud environment.</p>
+<p><strong>The win:</strong> The Model Registry keeps the model metadata strictly within your hybrid cloud environment.</p>
 </li>
 <li>
-<p><strong>The Benefit:</strong> You have a disconnected, air-gapped ready "vault" that ensures your proprietary fine-tuned models never leak.</p>
+<p><strong>The benefit:</strong> You have a disconnected, air-gapped ready "vault" that ensures your proprietary fine-tuned models never leak.</p>
 </li>
 </ul>
 </div>
@@ -173,13 +173,13 @@
 <div class="ulist">
 <ul>
 <li>
-<p><strong>The Win:</strong> The registry enforces a <strong>"Golden Reference."</strong></p>
+<p><strong>The win:</strong> The registry enforces a <strong>"golden reference."</strong></p>
 </li>
 <li>
-<p><strong>The Mechanism:</strong> The registry does not store the massive model files itself. Instead, it acts as the <strong>authoritative pointer</strong>. It holds the immutable URI (e.g., <code>s3://prod-models/granite-7b-v1/</code>) and the cryptographic hash of the model.</p>
+<p><strong>The mechanism:</strong> The registry does not store the massive model files itself. Instead, it acts as the <strong>authoritative pointer</strong>. It holds the immutable URI (e.g., <code>s3://prod-models/granite-7b-v1/</code>) and the cryptographic hash of the model.</p>
 </li>
 <li>
-<p><strong>The Benefit:</strong> When a platform engineer deploys to private infrastructure, the edge or cloud, they query the registry for the "production" tag. The registry directs them to the single, approved object in your secure storage. You build the configuration once, and the registry ensures every deployment uses the exact same asset.</p>
+<p><strong>The benefit:</strong> When a platform engineer deploys to private infrastructure, the edge or cloud, they query the registry for the "production" tag. The registry directs them to the single, approved object in your secure storage. You build the configuration once, and the registry ensures every deployment uses the exact same asset.</p>
 </li>
 </ul>
 </div>
@@ -192,10 +192,10 @@
 <div class="ulist">
 <ul>
 <li>
-<p><strong>The Win:</strong> Every model version is stamped with metadata: author, license, source URI, and performance metrics.</p>
+<p><strong>The win:</strong> Every model version is stamped with metadata: author, license, source URI, and performance metrics.</p>
 </li>
 <li>
-<p><strong>The Benefit:</strong> You achieve compliance by default. You can trace a hallucinating model in production back to the exact training set and developer who registered it.</p>
+<p><strong>The benefit:</strong> You achieve compliance by default. You can trace a hallucinating model in production back to the exact training set and developer who registered it.</p>
 </li>
 </ul>
 </div>
@@ -206,21 +206,21 @@
 <h2 id="_your_mission_build_the_factory"><a class="anchor" href="#_your_mission_build_the_factory"></a>Your Mission: Build the Factory</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this course, you will not just read about the registry; you will <strong>build one</strong>. You will take on the role of a Platform Engineer tasked with bringing order to a chaotic data science team.</p>
+<p>In this course, you will not just learn about the registry; you will <strong>build one</strong>. You will take on the role of a platform engineer tasked with bringing order to a chaotic data science team.</p>
 </div>
 <div class="paragraph">
-<p><strong>You will execute the following Technical Workflow:</strong></p>
+<p><strong>You will execute the following technical workflow:</strong></p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p><strong>The Infrastructure:</strong> Deploy the backing services (MySQL &amp; Object Storage) required to power the registry.</p>
+<p><strong>The infrastructure:</strong> Deploy the backing services (MySQL &amp; Object Storage) required to power the registry.</p>
 </li>
 <li>
-<p><strong>The Ingestion:</strong> Use Python code to fetch a model from Hugging Face and formally "register" it with versioned metadata.</p>
+<p><strong>The ingestion:</strong> Use Python code to fetch a model from Hugging Face and formally "register" it with versioned metadata.</p>
 </li>
 <li>
-<p><strong>The Payoff:</strong> Connect your private registry to the <strong>Model Catalog</strong>, making your secure model available for one-click deployment by business users.</p>
+<p><strong>The payoff:</strong> Connect your private registry to the <strong>Model Catalog</strong>, making your secure model available for one-click deployment by business users.</p>
 </li>
 </ol>
 </div>
