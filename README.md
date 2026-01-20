@@ -1,136 +1,90 @@
-Here is the **`README.md`** for the repository root.
+📚 Option 1: View the Full Course (Antora)
+This repository is structured as an Antora documentation site. To view the full learning experience, including architecture deep-dives and SRE playbooks:
 
-This file serves two purposes:
+Using Docker
+Bash
 
-1. It documents how to build the full course (Antora).
-2. It acts as a **"Cheat Sheet"** for advanced users who want to run the lab immediately without reading the full course text.
-
----
-
-**File Name:** `README.md`
-
-```markdown
-# The AI Supply Chain: Red Hat OpenShift AI 3.0 Model Registry
-**From Shadow IT to Trusted Assets**
-
-> **The Problem:** Data Scientists are downloading models to random laptops and S3 buckets.  
-> **The Solution:** A Private Model Registry that governs your AI assets ("The Vault") and connects them to the OpenShift AI Dashboard ("The Showroom").
-
-This repository contains a complete **"Course-in-a-Box"** that teaches you how to deploy, populate, and integrate the Red Hat OpenShift AI (RHOAI) Model Registry.
-
----
-
-## 📚 Option 1: View the Full Course (Antora)
-
-This repository is structured as an Antora documentation site. To view the full learning experience with diagrams, architecture deep-dives, and troubleshooting guides:
-
-### Using Docker (Recommended)
-```bash
 docker run -u $(id -u) -v $PWD:/antora:Z --rm -t antora/antora playbook.yaml
-# Open the generated site:
-# open build/site/index.html
+# Open build/site/index.html
+Using Local NPM
+Bash
 
-```
-
-### Using Local NPM
-
-```bash
 npm install
 npx antora playbook.yaml
 # Open build/site/index.html
+⚡ Option 2: The Fast Track (Lab Deployment)
+Follow these steps to deploy the infrastructure and register your first governed model.
 
-```
+Prerequisites
 
----
+Platform: Red Hat OpenShift AI v3.0.
+Access: cluster-admin privileges.
+CLI: oc logged into your cluster.
 
-## ⚡ Option 2: The Fast Track (Deployment Guide)
+Step 1: Deploy Infrastructure ("The Brain & The Vault")
+Deploy the MySQL 8.0 database and MinIO object storage into the lab namespace.
 
-If you are an experienced Platform Engineer and just want to deploy the solution **now**, follow these steps.
+Bash
 
-### Prerequisites
-
-* **Cluster:** OpenShift AI 3.0 installed.
-* **Access:** `cluster-admin` privileges (required to install Registry dependencies).
-* **CLI:** `oc` and `python3` installed locally.
-
-### Step 1: Deploy Infrastructure ("The Plumbing")
-
-Create the namespace, MySQL database, and MinIO object storage.
-
-```bash
+chmod u+x ./deploy/setup.sh
 ./deploy/setup.sh
 
-```
+Wait for pods in rhoai-model-registry-lab to reach Running status.
 
-*Wait for pods in `rhoai-model-registry` to be `Running`.*
+Step 2: Link the Registry to the Database
+Apply the ModelRegistry custom resource to connect the service to the MySQL backend.
 
-### Step 2: Ingest & Register a Model ("The Content")
+Bash
 
-Run the automated pipeline to:
+oc apply -f deploy/registry/model-registry.yaml
+Step 3: Automated Ingestion & Registration
+Run the pipeline to download the Qwen3-0.6B model, upload it to your private vault, and register versioned metadata.
 
-1. Download `granite-7b-lab` from Hugging Face.
-2. Upload it to your private MinIO bucket.
-3. Register the metadata in the Model Registry.
 
-```bash
-# Install dependencies (if needed)
-pip install -r deploy/registration/requirements.txt
+Bash
 
-# Run the pipeline (Internal DNS Mode)
+chmod u+x ./deploy/run_pipeline.sh
 ./deploy/run_pipeline.sh
+Step 4: Connect the Catalog ("The Showroom")
+The Model Catalog uses a Kubernetes ConfigMap for configuration. Edit this object to add your private registry sources.
 
-```
 
-### Step 3: Connect the Catalog ("The UI")
 
-Apply the configuration that tells the RHOAI Dashboard to display your private registry models.
+Bash
 
-```bash
-oc apply -f deploy/catalog/catalog-source.yaml
+oc project rhoai-model-registries
+oc edit configmap model-catalog-sources
 
-```
+Insert the sources.yaml and registry-models.yaml definitions as specified in the lab.
 
-### Step 4: Verify
+Step 5: Visual Verification
+Open the OpenShift AI Dashboard.
 
-1. Open the **OpenShift AI Dashboard**.
-2. Go to **Model Catalog**.
-3. Look for the **"Private Enterprise Registry"** tab.
-4. Deploy the **Granite-7B-Enterprise** model.
+Navigate to Model Catalog.
 
----
+Look for the "Model-Registry-Lab" source and the Qwen3-0.6B card.
 
-## 📂 Repository Structure
+🛠 Troubleshooting & Day 2 Operations
 
-```text
-/
-├── modules/                  # Antora Course Source (Adoc files)
-│   └── ROOT/pages/           # The actual learning content
-│
-├── deploy/                   # The Lab Code
-│   ├── infrastructure/       # MySQL & MinIO YAMLs
-│   ├── registration/         # Python Ingestion Scripts
-│   └── catalog/              # Dashboard Integration YAML
-│
-└── antora-playbook.yml       # Antora Build Configuration
+Pod Failures: Check if the Registry pod is in CrashLoopBackOff, which usually indicates a database connection error.
 
-```
 
-## 🛠 Troubleshooting
+Access Denied: Verify that the registry-db-secret matches your MySQL credentials.
 
-* **Database Connection Failed?** Check `oc get secret model-registry-db-secret -n rhoai-model-registry`.
-* **Script Can't Connect?** Ensure you are running the python scripts from a terminal *inside* the cluster, OR use `oc port-forward` if running locally (see `troubleshooting.adoc`).
 
-```
+Catalog Visibility: If models don't appear, check the Dashboard logs for YAML parsing errors in the ConfigMap.
 
-***
 
-### Next Steps for You
-This concludes the creation of the repository assets. You now have the full package:
-1.  **Course Content** (Adoc pages).
-2.  **Lab Infrastructure** (YAMLs & Setup Script).
-3.  **Automation Logic** (Python & Bash).
-4.  **Documentation** (README).
+Emergency Reset: To restart the lab, delete the rhoai-model-registry-lab project and re-run the setup script.
 
-Would you like me to finally generate the **`playbook.yaml`** so you can physically build this site, or is there anything else you need to refine?
+📂 Repository Structure
+modules/ROOT/pages/: Source content for the Antora course.
 
-```
+
+deploy/infrastructure/: YAMLs for MySQL and MinIO.
+
+
+deploy/registration/: Python scripts for automated model ingestion.
+
+
+deploy/catalog/: Configuration for Dashboard integration.
