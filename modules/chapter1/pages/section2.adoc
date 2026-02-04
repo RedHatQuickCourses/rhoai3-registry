@@ -48,6 +48,28 @@ chmod u+x ./deploy/setup.sh
 
 Make sure you run the additional output command to set the model registry DB secret.
 
+[source,bash]
+----
+oc create secret generic registry-db-secret \
+  -n rhoai-model-registries \
+  --from-literal=database-host='mysql.rhoai-model-registry-lab.svc.cluster.local' \
+  --from-literal=database-port='3306' \
+  --from-literal=database-name='sampledb' \
+  --from-literal=database-user='admin' \
+  --from-literal=database-password='mysql-admin'
+----
+
+---
+
+
+*Expected Output:*
+----
+NAME                              READY   STATUS    RESTARTS   AGE
+mysql-5d8f7-xyz                   1/1     Running   0          45s
+minio-7b9c2-abc                   1/1     Running   0          45s
+s3-ui-6d87f-rst.                  1/1     Running   0          20s
+----
+
 2. **Verify the Pods:**
 Ensure the database and storage are running before proceeding.
 +
