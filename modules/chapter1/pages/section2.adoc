@@ -62,13 +62,6 @@ oc create secret generic registry-db-secret \
 ---
 
 
-*Expected Output:*
-----
-NAME                              READY   STATUS    RESTARTS   AGE
-mysql-5d8f7-xyz                   1/1     Running   0          45s
-minio-7b9c2-abc                   1/1     Running   0          45s
-s3-ui-6d87f-rst.                  1/1     Running   0          20s
-----
 
 2. **Verify the Pods:**
 Ensure the database and storage are running before proceeding.
