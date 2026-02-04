@@ -3,6 +3,7 @@ set -e
 
 # --- CONFIGURATION ---
 NAMESPACE="rhoai-model-registry-lab"
+# INPUT: The full Hugging Face ID
 MODEL_ID="Qwen/Qwen3-0.6B"
 REGISTRY_HOST="http://model-registry-lab.rhoai-model-registries.svc.cluster.local"
 MINIO_HOST="minio-service.${NAMESPACE}.svc.cluster.local"
@@ -13,6 +14,7 @@ echo "🚀 Preparing Supply Chain Job for $MODEL_ID..."
 # -----------------------------------------------------------------------------
 # 1. Create Service Account
 # -----------------------------------------------------------------------------
+echo "➤ Ensuring ServiceAccount '$SERVICE_ACCOUNT' exists..."
 cat <<EOF | oc apply -n $NAMESPACE -f -
 apiVersion: v1
 kind: ServiceAccount
@@ -39,12 +41,13 @@ VERSION = "1.0.0"
 S3_BUCKET = "private-models"
 
 # LOGIC: Truncate the ID to get a clean short name
+# e.g. "Qwen/Qwen3-0.6B" -> "Qwen3-0.6B"
 if "/" in HF_ID:
     MODEL_NAME = HF_ID.split("/")[-1]
 else:
     MODEL_NAME = HF_ID
 
-# Env vars
+# Env vars provided by the Job
 REGISTRY_HOST = os.getenv("REGISTRY_HOST")
 REGISTRY_PORT = int(os.getenv("REGISTRY_PORT", 8080))
 AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY_ID")
@@ -54,6 +57,7 @@ S3_ENDPOINT = os.getenv("AWS_S3_ENDPOINT")
 def log(msg): print(f"[PIPELINE]: {msg}")
 
 def main():
+    # Ensure protocol
     global REGISTRY_HOST
     if not REGISTRY_HOST.startswith("http"):
         REGISTRY_HOST = f"http://{REGISTRY_HOST}"
@@ -78,6 +82,7 @@ def main():
     except:
         pass 
 
+    # Use clean MODEL_NAME for S3 folder structure
     s3_prefix = f"{MODEL_NAME}/{VERSION}"
     log(f"Uploading to s3://{S3_BUCKET}/{s3_prefix}...")
     
@@ -114,10 +119,12 @@ def main():
     # ---------------------------------------------------------
     log("Promoting Artifact State to LIVE (via REST API)...")
     
+    # Fetch artifact using the clean MODEL_NAME
     artifact = registry.get_model_artifact(MODEL_NAME, VERSION)
     
     if artifact:
         api_url = f"{REGISTRY_HOST}:{REGISTRY_PORT}/api/model_registry/v1alpha3/model_artifacts/{artifact.id}"
+        
         response = requests.patch(api_url, json={"state": "LIVE"})
         
         if response.status_code == 200:
