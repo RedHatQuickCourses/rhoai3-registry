@@ -2,8 +2,8 @@
 set -e
 
 # --- CONFIGURATION ---
-NAMESPACE="rhoai-model-registry-lab"
-MODEL_ID="Qwen/Qwen3-0.6B"
+NAMESPACE="model-registry-lab"
+MODEL_ID="Qwen/Qwen3-6B"
 REGISTRY_HOST="http://model-registry-lab.rhoai-model-registries.svc.cluster.local"
 MINIO_HOST="minio-service.${NAMESPACE}.svc.cluster.local"
 SERVICE_ACCOUNT="model-ingestion-sa"
