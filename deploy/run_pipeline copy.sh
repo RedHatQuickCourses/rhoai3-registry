@@ -4,6 +4,7 @@ set -e
 # --- CONFIGURATION ---
 NAMESPACE="rhoai-model-registry-lab"
 MODEL_ID="Qwen/Qwen3-0.6B"
+# FIX 1: Added http:// protocol explicitly to prevent aiohttp errors
 REGISTRY_HOST="http://model-registry-lab.rhoai-model-registries.svc.cluster.local"
 MINIO_HOST="minio-service.${NAMESPACE}.svc.cluster.local"
 SERVICE_ACCOUNT="model-ingestion-sa"
@@ -29,7 +30,6 @@ EOF
 cat <<EOF > ingest_and_register.py
 import os
 import boto3
-import requests 
 from huggingface_hub import snapshot_download
 from model_registry import ModelRegistry
 from botocore.client import Config
@@ -49,7 +49,7 @@ S3_ENDPOINT = os.getenv("AWS_S3_ENDPOINT")
 def log(msg): print(f"[PIPELINE]: {msg}")
 
 def main():
-    # Ensure protocol
+    # FIX 2: Safety check to ensure protocol is present
     global REGISTRY_HOST
     if not REGISTRY_HOST.startswith("http"):
         REGISTRY_HOST = f"http://{REGISTRY_HOST}"
@@ -74,6 +74,7 @@ def main():
     except:
         pass 
 
+    # Upload files
     s3_prefix = f"{MODEL_ID.replace('/', '-')}/{VERSION}"
     log(f"Uploading to s3://{S3_BUCKET}/{s3_prefix}...")
     
@@ -90,7 +91,8 @@ def main():
     print(f"\n=== STEP 3: GOVERNANCE (MODEL REGISTRY) ===")
     log(f"Connecting to Registry at {REGISTRY_HOST}:{REGISTRY_PORT}...")
 
-    # We use the client for the complex registration logic
+    # Connect to Registry
+    # Note: is_secure=False allows HTTP, but we still need the protocol in the host string
     registry = ModelRegistry(server_address=REGISTRY_HOST, port=REGISTRY_PORT, author="LabUser", is_secure=False)
 
     log(f"Registering Model: {MODEL_ID}")
@@ -171,6 +173,7 @@ spec:
         args:
           - |
             echo "Installing dependencies..."
+            # Using specific range to avoid pypi version errors
             pip install boto3 huggingface-hub "model-registry>=0.2.0,<0.3.0" requests --quiet --no-cache-dir && \
             echo "Starting Ingestion..." && \
             python /scripts/ingest_and_register.py

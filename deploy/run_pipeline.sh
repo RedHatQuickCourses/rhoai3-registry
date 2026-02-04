@@ -3,8 +3,8 @@ set -e
 
 # --- CONFIGURATION ---
 NAMESPACE="rhoai-model-registry-lab"
+# INPUT: The full Hugging Face ID
 MODEL_ID="Qwen/Qwen3-0.6B"
-# FIX 1: Added http:// protocol explicitly to prevent aiohttp errors
 REGISTRY_HOST="http://model-registry-lab.rhoai-model-registries.svc.cluster.local"
 MINIO_HOST="minio-service.${NAMESPACE}.svc.cluster.local"
 SERVICE_ACCOUNT="model-ingestion-sa"
@@ -30,14 +30,22 @@ EOF
 cat <<EOF > ingest_and_register.py
 import os
 import boto3
+import requests
 from huggingface_hub import snapshot_download
 from model_registry import ModelRegistry
 from botocore.client import Config
 
 # --- CONFIGURATION ---
-MODEL_ID = "${MODEL_ID}"
+HF_ID = "${MODEL_ID}"
 VERSION = "1.0.0"
 S3_BUCKET = "private-models"
+
+# LOGIC CHANGE: Truncate the ID to get a clean short name
+# e.g. "Qwen/Qwen3-0.6B" -> "Qwen3-0.6B"
+if "/" in HF_ID:
+    MODEL_NAME = HF_ID.split("/")[-1]
+else:
+    MODEL_NAME = HF_ID
 
 # Env vars provided by the Job
 REGISTRY_HOST = os.getenv("REGISTRY_HOST")
@@ -49,14 +57,15 @@ S3_ENDPOINT = os.getenv("AWS_S3_ENDPOINT")
 def log(msg): print(f"[PIPELINE]: {msg}")
 
 def main():
-    # FIX 2: Safety check to ensure protocol is present
+    # Ensure protocol
     global REGISTRY_HOST
     if not REGISTRY_HOST.startswith("http"):
         REGISTRY_HOST = f"http://{REGISTRY_HOST}"
 
     print(f"\n=== STEP 1: ACQUIRING ASSETS ===")
-    log(f"Downloading '{MODEL_ID}' from Hugging Face...")
-    local_dir = snapshot_download(repo_id=MODEL_ID, 
+    log(f"Downloading '{HF_ID}' from Hugging Face...")
+    # Use full HF_ID for download
+    local_dir = snapshot_download(repo_id=HF_ID, 
                                   cache_dir="/tmp/hf_cache",
                                   allow_patterns=["*.json", "*.safetensors", "*.model", "tokenizer*"])
 
@@ -74,8 +83,8 @@ def main():
     except:
         pass 
 
-    # Upload files
-    s3_prefix = f"{MODEL_ID.replace('/', '-')}/{VERSION}"
+    # Use clean MODEL_NAME for S3 folder structure
+    s3_prefix = f"{MODEL_NAME}/{VERSION}"
     log(f"Uploading to s3://{S3_BUCKET}/{s3_prefix}...")
     
     for root, dirs, files in os.walk(local_dir):
@@ -91,41 +100,37 @@ def main():
     print(f"\n=== STEP 3: GOVERNANCE (MODEL REGISTRY) ===")
     log(f"Connecting to Registry at {REGISTRY_HOST}:{REGISTRY_PORT}...")
 
-    # Connect to Registry
-    # Note: is_secure=False allows HTTP, but we still need the protocol in the host string
     registry = ModelRegistry(server_address=REGISTRY_HOST, port=REGISTRY_PORT, author="LabUser", is_secure=False)
 
-    log(f"Registering Model: {MODEL_ID}")
+    log(f"Registering Model: {MODEL_NAME}")
     
+    # Use clean MODEL_NAME for Registry Entry
     model = registry.register_model(
-        MODEL_ID,
+        MODEL_NAME,
         s3_uri,
         model_format_name="safetensors",
         model_format_version="1.0",
         version=VERSION,
-        description="Qwen3 Small Language Model imported from Hugging Face",
+        description=f"{MODEL_NAME} imported from Hugging Face",
         metadata={
             "source": "huggingface",
-            "original_repo": MODEL_ID,
+            "original_repo": HF_ID,
             "license": "Apache 2.0",
             "is_governed": "true"
         }
     )
 
     # ---------------------------------------------------------
-    # FIX: DIRECT REST API CALL TO UPDATE STATE
+    # FORCE STATE TO LIVE (Direct API)
     # ---------------------------------------------------------
     log("Promoting Artifact State to LIVE (via REST API)...")
     
-    # 1. Get the artifact object to find its ID (The 'get' method works, only 'update' was broken)
-    artifact = registry.get_model_artifact(MODEL_ID, VERSION)
+    # Fetch artifact using the clean MODEL_NAME
+    artifact = registry.get_model_artifact(MODEL_NAME, VERSION)
     
     if artifact:
-        # 2. Construct the direct API URL
-        # e.g. http://host:8080/api/model_registry/v1alpha3/model_artifacts/123
         api_url = f"{REGISTRY_HOST}:{REGISTRY_PORT}/api/model_registry/v1alpha3/model_artifacts/{artifact.id}"
         
-        # 3. Patch the state directly
         response = requests.patch(api_url, json={"state": "LIVE"})
         
         if response.status_code == 200:
@@ -137,7 +142,7 @@ def main():
         log("WARNING: Could not find artifact ID to update.")
 
     print(f"\n✅ SUCCESS: Supply Chain Complete!")
-    print(f"    Model ID: {model.id}")
+    print(f"    Model Name: {model.name}")
     print(f"    Version: {VERSION}")
     print(f"    State: LIVE")
 
@@ -173,7 +178,6 @@ spec:
         args:
           - |
             echo "Installing dependencies..."
-            # Using specific range to avoid pypi version errors
             pip install boto3 huggingface-hub "model-registry>=0.2.0,<0.3.0" requests --quiet --no-cache-dir && \
             echo "Starting Ingestion..." && \
             python /scripts/ingest_and_register.py
