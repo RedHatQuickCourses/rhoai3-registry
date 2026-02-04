@@ -46,7 +46,10 @@ chmod u+x ./deploy/setup.sh
 ----
 
 
-Make sure you run the additional output command to set the model registry DB secret.
+1. **Manual DB Connection**
+
+The MySQL Database is running, but the Registry does not have the password yet.
+Please execute the following command manually to create the DB secret:
 
 [source,bash]
 ----
