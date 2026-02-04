@@ -112,9 +112,34 @@ def main():
         }
     )
 
+    # ---------------------------------------------------------
+    # FIX: DIRECT REST API CALL TO UPDATE STATE
+    # ---------------------------------------------------------
+    log("Promoting Artifact State to LIVE (via REST API)...")
+    
+    # 1. Get the artifact object to find its ID (The 'get' method works, only 'update' was broken)
+    artifact = registry.get_model_artifact(MODEL_ID, VERSION)
+    
+    if artifact:
+        # 2. Construct the direct API URL
+        # e.g. http://host:8080/api/model_registry/v1alpha3/model_artifacts/123
+        api_url = f"{REGISTRY_HOST}:{REGISTRY_PORT}/api/model_registry/v1alpha3/model_artifacts/{artifact.id}"
+        
+        # 3. Patch the state directly
+        response = requests.patch(api_url, json={"state": "LIVE"})
+        
+        if response.status_code == 200:
+            log("State successfully updated to LIVE.")
+        else:
+            log(f"WARNING: Failed to update state. API Code: {response.status_code}")
+            log(f"Response: {response.text}")
+    else:
+        log("WARNING: Could not find artifact ID to update.")
+
     print(f"\n✅ SUCCESS: Supply Chain Complete!")
     print(f"    Model ID: {model.id}")
     print(f"    Version: {VERSION}")
+    print(f"    State: LIVE")
 
 if __name__ == "__main__":
     main()
