@@ -3,7 +3,6 @@ set -e
 
 # --- CONFIGURATION ---
 NAMESPACE="rhoai-model-registry-lab"
-# INPUT: The full Hugging Face ID
 MODEL_ID="Qwen/Qwen3-0.6B"
 REGISTRY_HOST="http://model-registry-lab.rhoai-model-registries.svc.cluster.local"
 SERVICE_ACCOUNT="model-ingestion-sa"
@@ -27,10 +26,11 @@ EOF
 # -----------------------------------------------------------------------------
 cat <<EOF > ingest_and_register.py
 import os
+import boto3
 import requests
 from huggingface_hub import snapshot_download
 from model_registry import ModelRegistry
-from model_registry.utils import S3Params  # [cite: 126]
+from botocore.client import Config
 
 # --- CONFIGURATION ---
 HF_ID = "${MODEL_ID}"
@@ -47,11 +47,14 @@ else:
 # Env vars
 REGISTRY_HOST = os.getenv("REGISTRY_HOST")
 REGISTRY_PORT = int(os.getenv("REGISTRY_PORT", 8080))
-# Note: AWS credentials are read automatically by the library/boto3
+AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+S3_ENDPOINT = os.getenv("AWS_S3_ENDPOINT")
 
 def log(msg): print(f"[PIPELINE]: {msg}")
 
 def main():
+    # 1. Ensure Registry Protocol
     global REGISTRY_HOST
     if not REGISTRY_HOST.startswith("http"):
         REGISTRY_HOST = f"http://{REGISTRY_HOST}"
@@ -62,29 +65,61 @@ def main():
                                   cache_dir="/tmp/hf_cache",
                                   allow_patterns=["*.json", "*.safetensors", "*.model", "tokenizer*"])
 
-    print(f"\n=== STEP 2: GOVERNANCE (UPLOAD & REGISTER) ===")
+    print(f"\n=== STEP 2: SECURING ASSETS (MINIO) ===")
+    log(f"Connecting to Vault at {S3_ENDPOINT}...")
+    
+    # MANUAL UPLOAD: This is safer than the helper method because 
+    # we can explicitly force the endpoint_url for Minio.
+    s3 = boto3.client('s3',
+                      endpoint_url=S3_ENDPOINT,
+                      aws_access_key_id=AWS_ACCESS_KEY,
+                      aws_secret_access_key=AWS_SECRET_KEY,
+                      config=Config(signature_version='s3v4'))
+    
+    try:
+        s3.create_bucket(Bucket=S3_BUCKET)
+    except:
+        pass 
+
+    # Upload files using the clean name
+    s3_prefix = f"{MODEL_NAME}/{VERSION}"
+    log(f"Uploading to s3://{S3_BUCKET}/{s3_prefix}...")
+    
+    for root, dirs, files in os.walk(local_dir):
+        for file in files:
+            local_path = os.path.join(root, file)
+            relative_path = os.path.relpath(local_path, local_dir)
+            s3_key = os.path.join(s3_prefix, relative_path)
+            s3.upload_file(local_path, S3_BUCKET, s3_key)
+            
+    # --- CRITICAL FIX: CONSTRUCT HTTP URI ---
+    # The Dashboard typically hides "s3://" URIs if it can't find a matching Data Connection.
+    # By registering it as "http://", we force the UI to display the link.
+    if S3_ENDPOINT.startswith("http"):
+        # If endpoint already has http/https, use it
+        s3_uri = f"{S3_ENDPOINT}/{S3_BUCKET}/{s3_prefix}"
+    else:
+        # Assume http for internal Minio service
+        s3_uri = f"http://{S3_ENDPOINT}/{S3_BUCKET}/{s3_prefix}"
+        
+    log(f"Upload Complete. Registered Location: {s3_uri}")
+
+    print(f"\n=== STEP 3: GOVERNANCE (MODEL REGISTRY) ===")
     log(f"Connecting to Registry at {REGISTRY_HOST}:{REGISTRY_PORT}...")
 
     registry = ModelRegistry(server_address=REGISTRY_HOST, port=REGISTRY_PORT, author="LabUser", is_secure=False)
 
-    # Prepare S3 Configuration 
-    # The endpoint URL is handled by the AWS_ENDPOINT_URL env var we set in the Job
-    s3_params = S3Params(
-        bucket_name=S3_BUCKET,
-        s3_prefix=f"{MODEL_NAME}/{VERSION}",
-    )
-
-    log(f"Uploading and Registering Model: {MODEL_NAME}")
+    log(f"Registering Model: {MODEL_NAME}")
     
-    # NEW APPROACH: Single call to upload and register 
-    model = registry.upload_artifact_and_register_model(
-        name=MODEL_NAME,
-        version=VERSION,
-        model_files_path=local_dir,
-        upload_params=s3_params,
-        description=f"{MODEL_NAME} imported from Hugging Face via Automated Pipeline",
+    # Register with the HTTP URI so it appears in the UI
+    model = registry.register_model(
+        MODEL_NAME,
+        s3_uri,  # <--- This is the key to visibility
         model_format_name="safetensors",
-        model_format_version="1.0"
+        model_format_version="1.0",
+        version=VERSION,
+        description=f"{MODEL_NAME} imported from Hugging Face",
+        # Intentionally omitting 'metadata' source keys to force UI to show the URI
     )
 
     # ---------------------------------------------------------
@@ -142,8 +177,8 @@ spec:
         args:
           - |
             echo "Installing dependencies..."
-            # Install with [s3] extra as per docs 
-            pip install "model-registry[s3]>=0.2.0,<0.3.0" huggingface-hub requests --quiet --no-cache-dir && \
+            # Revert to standard package, no extras needed for manual boto3
+            pip install boto3 huggingface-hub "model-registry>=0.2.0,<0.3.0" requests --quiet --no-cache-dir && \
             echo "Starting Ingestion..." && \
             python /scripts/ingest_and_register.py
         volumeMounts:
@@ -164,13 +199,6 @@ spec:
             secretKeyRef:
               name: aws-connection-minio
               key: AWS_SECRET_ACCESS_KEY
-        # Standard S3 Endpoint (for Boto3/ModelRegistry compatibility)
-        - name: AWS_ENDPOINT_URL
-          valueFrom:
-            secretKeyRef:
-              name: aws-connection-minio
-              key: AWS_S3_ENDPOINT
-        # Keep original env var just in case
         - name: AWS_S3_ENDPOINT
           valueFrom:
             secretKeyRef:
