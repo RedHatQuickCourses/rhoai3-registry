@@ -83,7 +83,7 @@ data:
             string_value: "1.0"
         artifacts:
           - name: "model-artifact"
-            uri: "s3://models/Qwen3-0.6B"
+            uri: "s3://private-models/Qwen3-0.6B"
         
 
 ----
