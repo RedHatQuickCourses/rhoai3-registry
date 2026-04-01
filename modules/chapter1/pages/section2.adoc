@@ -17,7 +17,8 @@ In this lab, you will take on the role of a **lead platform engineer**. Your dat
 * **Cluster access:** You are logged into an OpenShift AI 3.0 cluster via terminal (`oc login`).
 * **Permissions:** You have `cluster-admin` or sufficient namespace privileges.
 * **Repository:** You have cloned the course repository as follows:
-+
+====
+
 [source,bash]
 ----
   git clone https://github.com/RedHatQuickCourses/rhoai3-registry.git
@@ -36,13 +37,11 @@ We have provided a script that deploys a MySQL 8.0 instance and a MinIO object s
 [source,bash]
 ----
 chmod u+x ./deploy/setup.sh
-
 ----
-
++
 [source,bash]
 ----
 ./deploy/setup.sh
-
 ----
 
 
