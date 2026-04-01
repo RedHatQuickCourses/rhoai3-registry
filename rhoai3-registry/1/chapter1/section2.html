@@ -91,6 +91,8 @@
 </aside>
 <article class="doc">
 <h1 class="page">Lab: Deploying Your AI Supply Chain</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph lead">
 <p><strong>Theory is over. Now It&#8217;s is time to build.</strong></p>
 </div>
@@ -128,11 +130,11 @@
   cd rhoai3-registry/</code></pre>
 </div>
 </div>
-<div class="exampleblock">
-<div class="content">
-<div class="paragraph">
-<p>== Step 1: Dependent Infrastructure</p>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_step_1_dependent_infrastructure"><a class="anchor" href="#_step_1_dependent_infrastructure"></a>Step 1: Dependent Infrastructure</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>The Model Registry is stateless. Before you can turn it on, you need two things: a <strong>Brain</strong> (database) and a <strong>Vault</strong> (object storage).</p>
 </div>
@@ -199,9 +201,11 @@ minio-7b9c2-abc                   1/1     Running   0          45s
 s3-ui-6d87f-rst.                  1/1     Running   0          20s</pre>
 </div>
 </div>
-<div class="paragraph">
-<p>== Step 2: Link the Model Registry to the Database</p>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_step_2_link_the_model_registry_to_the_database"><a class="anchor" href="#_step_2_link_the_model_registry_to_the_database"></a>Step 2: Link the Model Registry to the Database</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>Edit the name field to change the name of the Model Registry</p>
 </div>
@@ -241,9 +245,11 @@ EOF</code></pre>
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get modelregistries.modelregistry.opendatahub.io -n rhoai-model-registries</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>== Step 3</p>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_step_3"><a class="anchor" href="#_step_3"></a>Step 3</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>Now that the Model Registry is running, it is empty.</p>
 </div>
@@ -290,9 +296,11 @@ Watch the logs. You should see the "handshake" happen:</p>
 </li>
 </ol>
 </div>
-<div class="paragraph">
-<p>== Step 4: Connect the Catalog</p>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_step_4_connect_the_catalog"><a class="anchor" href="#_step_4_connect_the_catalog"></a>Step 4: Connect the Catalog</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>At this moment, the model is safe in your registry, but the data scientists cannot see it yet. The <strong>Model Catalog</strong> in the RHOAI Dashboard is still showing only the public Red Hat default models.</p>
 </div>
