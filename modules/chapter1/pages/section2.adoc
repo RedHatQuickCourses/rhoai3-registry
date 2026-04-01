@@ -24,7 +24,6 @@ In this lab, you will take on the role of a **lead platform engineer**. Your dat
   git clone https://github.com/RedHatQuickCourses/rhoai3-registry.git
   cd rhoai3-registry/
 ----
-====
 
 == Step 1: Dependent Infrastructure
 
