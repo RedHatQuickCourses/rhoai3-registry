@@ -120,7 +120,7 @@ oc get modelregistries.modelregistry.opendatahub.io -n rhoai-model-registries
 ----
 
 
-== Step 3
+== Step 3: Register an LLM
 
 Now that the Model Registry is running, it is empty.
 
